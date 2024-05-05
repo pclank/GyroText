@@ -20,6 +20,7 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 
 
+// Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
     LEFT_ROT, RIGHT_ROT, UP_ROT, CLOCK_ROT, COUNTERCLOCK_ROT, DOWN_ROT, FWD, AFT
 }
@@ -29,6 +30,13 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
+
+    // Development buttons
+    // TODO: Remove or hide in release version
+    lateinit var devLeftBut: Button
+    lateinit var devRightBut: Button
+    lateinit var devUpBut: Button
+    lateinit var devDownBut: Button
 
     // Text for sensor acceleration values
     lateinit var x_text: TextView
@@ -41,18 +49,15 @@ class MainActivity : ComponentActivity() {
     lateinit var zPos_text: TextView
 
     // Our selectable text
-//    lateinit var test_text: TextView
     lateinit var test_text: EditText
 
-    lateinit var spannable: Spannable
-
-    // Threshold "macros"
+    // Threshold "macros" for Gyro
     private val thres = 0.2f
     private val xThres = 0.8f
     private val yThres = 0.8f
     private val zThres = 0.9f
 
-    // Zero position of phone
+    // Zero position of phone rotation
     private var zeroPos: float3 = float3(0.0f, 0.0f, 0.0f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +66,10 @@ class MainActivity : ComponentActivity() {
 
         // Initialize all
         zeroBut = findViewById(R.id.zero_but)
+        devLeftBut = findViewById(R.id.dev_left_but)
+        devRightBut = findViewById(R.id.dev_right_but)
+        devUpBut = findViewById(R.id.dev_up_but)
+        devDownBut = findViewById(R.id.dev_down_but)
         x_text = findViewById(R.id.x_axis_val)
         y_text = findViewById(R.id.y_axis_val)
         z_text = findViewById(R.id.z_axis_val)
@@ -69,7 +78,12 @@ class MainActivity : ComponentActivity() {
         zPos_text = findViewById(R.id.z_pos_val)
         test_text = findViewById(R.id.test_screen_text)
 
+        // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
+        devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
+        devRightBut.setOnClickListener { updateSelection(SensorInput.RIGHT_ROT) }
+        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
+        devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
 
         gyroscope = Gyroscope(this)
 
