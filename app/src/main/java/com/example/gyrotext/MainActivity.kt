@@ -20,8 +20,8 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 
 
-enum class GyroInput {
-    LEFT, RIGHT, UP, DOWN, FWD, AFT
+enum class SensorInput {
+    LEFT_ROT, RIGHT_ROT, UP_ROT, CLOCK_ROT, COUNTERCLOCK_ROT, DOWN_ROT, FWD, AFT
 }
 
 class MainActivity : ComponentActivity() {
@@ -102,26 +102,22 @@ class MainActivity : ComponentActivity() {
 
                 // Y rotation
                 if (zeroPos.y > yThres)
-                    extendRight(test_text.text, test_text.layout)
+                    updateSelection(SensorInput.RIGHT_ROT)
                 else if (zeroPos.y < -yThres)
-                    extendLeft(test_text.text, test_text.layout)
+                    updateSelection(SensorInput.LEFT_ROT)
 
                 // X rotation
                 // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
                 if (zeroPos.x > xThres)
-                    extendDown(test_text.text, test_text.layout)
+                    updateSelection(SensorInput.DOWN_ROT)
                 else if (zeroPos.x < -xThres)
-                    extendUp(test_text.text, test_text.layout)
+                    updateSelection(SensorInput.UP_ROT)
 
                 // Z rotation
                 if (zeroPos.z > zThres)
-                {
-                    // TODO: Do many things!
-                }
+                    updateSelection(SensorInput.COUNTERCLOCK_ROT)
                 else if (zeroPos.z < -zThres)
-                {
-                    // TODO: Do many things!
-                }
+                    updateSelection(SensorInput.CLOCK_ROT)
             }
         })
     }
@@ -144,6 +140,28 @@ class MainActivity : ComponentActivity() {
         xPos_text.text = "xpos: "+zeroPos.x.toString()
         yPos_text.text = "ypos: "+zeroPos.y.toString()
         zPos_text.text = "zpos: "+zeroPos.z.toString()
+    }
+    
+    fun updateSelection(inputType: SensorInput)
+    {
+        if (inputType == SensorInput.RIGHT_ROT)
+            extendRight(test_text.text, test_text.layout)
+        else if (inputType == SensorInput.LEFT_ROT)
+            extendLeft(test_text.text, test_text.layout)
+        
+        if (inputType == SensorInput.DOWN_ROT)
+            extendDown(test_text.text, test_text.layout)
+        else if (inputType == SensorInput.UP_ROT)
+            extendUp(test_text.text, test_text.layout)
+
+        if (inputType == SensorInput.CLOCK_ROT)
+        {
+            // TODO: Do many things!
+        }
+        else if (inputType == SensorInput.COUNTERCLOCK_ROT)
+        {
+            // TODO: Do many things!
+        }
     }
 
     fun setZeroButton()
