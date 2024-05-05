@@ -1,18 +1,28 @@
 package com.example.gyrotext
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.Selection
+import android.text.Selection.extendDown
+import android.text.Selection.extendLeft
+import android.text.Selection.extendRight
+import android.text.Selection.extendUp
+import android.text.Selection.moveUp
+import android.text.Selection.removeSelection
+import android.text.Selection.selectAll
+import android.text.Selection.setSelection
+import android.text.Spannable
+import android.text.SpannableString
+import android.view.WindowManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.gyrotext.ui.theme.GyroTextTheme
+
+
+enum class GyroInput {
+    LEFT, RIGHT, UP, DOWN, FWD, AFT
+}
 
 class MainActivity : ComponentActivity() {
     // Many variables
@@ -30,10 +40,17 @@ class MainActivity : ComponentActivity() {
     lateinit var yPos_text: TextView
     lateinit var zPos_text: TextView
 
+    // Our selectable text
+//    lateinit var test_text: TextView
+    lateinit var test_text: EditText
+
+    lateinit var spannable: Spannable
+
     // Threshold "macros"
     private val thres = 0.2f
     private val xThres = 0.8f
     private val yThres = 0.8f
+    private val zThres = 0.9f
 
     // Zero position of phone
     private var zeroPos: float3 = float3(0.0f, 0.0f, 0.0f)
@@ -50,6 +67,7 @@ class MainActivity : ComponentActivity() {
         xPos_text = findViewById(R.id.x_pos_val)
         yPos_text = findViewById(R.id.y_pos_val)
         zPos_text = findViewById(R.id.z_pos_val)
+        test_text = findViewById(R.id.test_screen_text)
 
         zeroBut.setOnClickListener { setZeroButton() }
 
@@ -57,30 +75,53 @@ class MainActivity : ComponentActivity() {
 
         gyroscope!!.setup(this)
 
-        // create a listener for gyroscope
+        test_text.setOnLongClickListener {
+            setZeroButton()
+
+            true
+        }
+
+        // listener for gyroscope sensor
         gyroscope!!.setListener(object : Gyroscope.Listener {
             // on rotation method of gyroscope
-            override fun onRotation(tx: Float, ty: Float, tz: Float) {
+            override fun onRotation(tx: Float, ty: Float, ts: Float) {
                 if (resetFlag)
                     resetZeroPos()
 
                 zeroPos.x += tx
                 zeroPos.y += ty
-                zeroPos.z += tz
+                zeroPos.z += ts
 
-                // TODO: Consider better input choice (e.g., using highest value)!
+                reportMetrics(tx, ty, ts, zeroPos)
 
-//                if (zeroPos.y > yThres)
-//                    cView.updateAABB(100)
-//                else if (zeroPos.y < -yThres)
-//                    cView.updateAABB(-100)
-//
-//                if (zeroPos.x > xThres)
-//                    cView.addAABB()
-//                else if (zeroPos.x < -xThres)
-//                    cView.deleteAABB()
+                // Skip if no selection
+                if (!test_text.hasSelection())
+                    return
 
-                reportMetrics(tx, ty, tz, zeroPos)
+                // TODO: Consider better input choice (e.g., using highest value amongst axes)!
+
+                // Y rotation
+                if (zeroPos.y > yThres)
+                    extendRight(test_text.text, test_text.layout)
+                else if (zeroPos.y < -yThres)
+                    extendLeft(test_text.text, test_text.layout)
+
+                // X rotation
+                // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
+                if (zeroPos.x > xThres)
+                    extendDown(test_text.text, test_text.layout)
+                else if (zeroPos.x < -xThres)
+                    extendUp(test_text.text, test_text.layout)
+
+                // Z rotation
+                if (zeroPos.z > zThres)
+                {
+                    // TODO: Do many things!
+                }
+                else if (zeroPos.z < -zThres)
+                {
+                    // TODO: Do many things!
+                }
             }
         })
     }
