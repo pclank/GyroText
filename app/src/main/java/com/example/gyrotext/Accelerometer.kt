@@ -6,12 +6,9 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 
-class Gyroscope(context: Context) {
-    // create an interface with one method
+class Accelerometer(context: Context) {
     interface Listener {
-        // create method with all 3
-        // axis translation as argument
-        fun onRotation(tx: Float, ty: Float, tz: Float)
+        fun onMovement(tx: Float, ty: Float, tz: Float)
     }
 
     // create an instance
@@ -31,20 +28,20 @@ class Gyroscope(context: Context) {
     {
 
         // create instance of sensor manager
+        // TODO: Could potentially also do with a single instance, but performance gains unlikely
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
-        // create instance of sensor with type gyroscope
-        sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        // create instance of sensor with type accelerometer
+//        sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)      // this gets rid of gravity, which is nice
 
         // create the sensor listener
         sensorEventListener = object : SensorEventListener {
-            // this method is called when
-            // the device's position changes
+            // call when movement was detected
             override fun onSensorChanged(sensorEvent: SensorEvent) {
-                // check if listener is different from null
-                if (listener != null) {
-                    // pass the three floats in listener on rotation of axis
-                    listener!!.onRotation(
+                if (listener != null)
+                {
+                    listener!!.onMovement(
                         sensorEvent.values[0], sensorEvent.values[1],
                         sensorEvent.values[2]
                     )
