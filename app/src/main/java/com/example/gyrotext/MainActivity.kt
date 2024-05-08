@@ -20,6 +20,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import java.util.Timer
 
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
     // Many variables
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
+    private lateinit var c_timer: CustomTimer
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
 
@@ -64,9 +66,12 @@ class MainActivity : ComponentActivity() {
     private val gzThres = 0.9f
 
     // Threshold "macros" for Accel
-    private val axThres = 1.5f
-    private val ayThres = 1.5f
-    private val azThres = 1.5f
+//    private val axThres = 1.5f
+//    private val ayThres = 1.5f
+//    private val azThres = 1.5f
+    private val axThres = 0.8f
+    private val ayThres = 0.8f
+    private val azThres = 0.8f
 
     // Zero position of phone rotation
     private var zeroRot: float3 = float3(0.0f, 0.0f, 0.0f)
@@ -109,6 +114,9 @@ class MainActivity : ComponentActivity() {
         // Initialize and set up accelerometer
         accelerometer = Accelerometer(this)
         accelerometer!!.setup(this)
+
+        // Initialize timer
+        c_timer = CustomTimer()
 
         test_text.setOnLongClickListener {
             setZeroButton()
@@ -278,11 +286,19 @@ class MainActivity : ComponentActivity() {
 
         if (inputType == SensorInput.RIGHT_MOVE)
         {
+            if (!c_timer.checkTimer())
+                return
+
             extendToRightEdge(test_text.text, test_text.layout)
+            c_timer.setTimer(1000)
         }
         else if (inputType == SensorInput.LEFT_MOVE)
         {
+            if (!c_timer.checkTimer())
+                return
+
             extendToLeftEdge(test_text.text, test_text.layout)
+            c_timer.setTimer(1000)
         }
 
         if (inputType == SensorInput.UP_MOVE)
