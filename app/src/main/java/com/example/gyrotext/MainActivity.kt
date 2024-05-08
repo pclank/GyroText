@@ -6,6 +6,8 @@ import android.text.Selection
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
+import android.text.Selection.extendToLeftEdge
+import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.text.Selection.moveUp
 import android.text.Selection.removeSelection
@@ -22,12 +24,14 @@ import androidx.activity.ComponentActivity
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
-    LEFT_ROT, RIGHT_ROT, UP_ROT, CLOCK_ROT, COUNTERCLOCK_ROT, DOWN_ROT, FWD, AFT
+    LEFT_ROT, RIGHT_ROT, UP_ROT, DOWN_ROT, CLOCK_ROT, COUNTERCLOCK_ROT,
+    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD, AFT
 }
 
 class MainActivity : ComponentActivity() {
     // Many variables
     private var gyroscope: Gyroscope? = null
+    private var accelerometer: Accelerometer? = null
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
 
@@ -39,9 +43,12 @@ class MainActivity : ComponentActivity() {
     lateinit var devDownBut: Button
 
     // Text for sensor acceleration values
-    lateinit var x_text: TextView
-    lateinit var y_text: TextView
-    lateinit var z_text: TextView
+    lateinit var g_x_text: TextView
+    lateinit var g_y_text: TextView
+    lateinit var g_z_text: TextView
+    lateinit var a_x_text: TextView
+    lateinit var a_y_text: TextView
+    lateinit var a_z_text: TextView
 
     // Text for inferred phone orientation values
     lateinit var xPos_text: TextView
@@ -52,12 +59,19 @@ class MainActivity : ComponentActivity() {
     lateinit var test_text: EditText
 
     // Threshold "macros" for Gyro
-    private val thres = 0.2f
-    private val xThres = 0.8f
-    private val yThres = 0.8f
-    private val zThres = 0.9f
+    private val gxThres = 0.8f
+    private val gyThres = 0.8f
+    private val gzThres = 0.9f
+
+    // Threshold "macros" for Accel
+    private val axThres = 1.5f
+    private val ayThres = 1.5f
+    private val azThres = 1.5f
 
     // Zero position of phone rotation
+    private var zeroRot: float3 = float3(0.0f, 0.0f, 0.0f)
+    
+    // Zero position of phone position (great sentence)
     private var zeroPos: float3 = float3(0.0f, 0.0f, 0.0f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,9 +84,12 @@ class MainActivity : ComponentActivity() {
         devRightBut = findViewById(R.id.dev_right_but)
         devUpBut = findViewById(R.id.dev_up_but)
         devDownBut = findViewById(R.id.dev_down_but)
-        x_text = findViewById(R.id.x_axis_val)
-        y_text = findViewById(R.id.y_axis_val)
-        z_text = findViewById(R.id.z_axis_val)
+        g_x_text = findViewById(R.id.x_axis_val)
+        g_y_text = findViewById(R.id.y_axis_val)
+        g_z_text = findViewById(R.id.z_axis_val)
+        a_x_text = findViewById(R.id.a_x_axis_val)
+        a_y_text = findViewById(R.id.a_y_axis_val)
+        a_z_text = findViewById(R.id.a_z_axis_val)
         xPos_text = findViewById(R.id.x_pos_val)
         yPos_text = findViewById(R.id.y_pos_val)
         zPos_text = findViewById(R.id.z_pos_val)
@@ -85,9 +102,13 @@ class MainActivity : ComponentActivity() {
         devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
         devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
 
+        // Initialize and set up gyroscope
         gyroscope = Gyroscope(this)
-
         gyroscope!!.setup(this)
+
+        // Initialize and set up accelerometer
+        accelerometer = Accelerometer(this)
+        accelerometer!!.setup(this)
 
         test_text.setOnLongClickListener {
             setZeroButton()
@@ -95,18 +116,18 @@ class MainActivity : ComponentActivity() {
             true
         }
 
-        // listener for gyroscope sensor
+        // listener for gyroscope sensor (non-null assertion)
         gyroscope!!.setListener(object : Gyroscope.Listener {
             // on rotation method of gyroscope
-            override fun onRotation(tx: Float, ty: Float, ts: Float) {
+            override fun onRotation(tx: Float, ty: Float, tz: Float) {
                 if (resetFlag)
-                    resetZeroPos()
+                    resetzeroRot()
 
-                zeroPos.x += tx
-                zeroPos.y += ty
-                zeroPos.z += ts
+                zeroRot.x += tx
+                zeroRot.y += ty
+                zeroRot.z += tz
 
-                reportMetrics(tx, ty, ts, zeroPos)
+                reportGyroMetrics(tx, ty, tz, zeroRot)
 
                 // Skip if no selection
                 if (!test_text.hasSelection())
@@ -115,23 +136,81 @@ class MainActivity : ComponentActivity() {
                 // TODO: Consider better input choice (e.g., using highest value amongst axes)!
 
                 // Y rotation
-                if (zeroPos.y > yThres)
+                if (zeroRot.y > gyThres)
                     updateSelection(SensorInput.RIGHT_ROT)
-                else if (zeroPos.y < -yThres)
+                else if (zeroRot.y < -gyThres)
                     updateSelection(SensorInput.LEFT_ROT)
 
                 // X rotation
                 // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
-                if (zeroPos.x > xThres)
+                if (zeroRot.x > gxThres)
                     updateSelection(SensorInput.DOWN_ROT)
-                else if (zeroPos.x < -xThres)
+                else if (zeroRot.x < -gxThres)
                     updateSelection(SensorInput.UP_ROT)
 
                 // Z rotation
-                if (zeroPos.z > zThres)
+                if (zeroRot.z > gzThres)
                     updateSelection(SensorInput.COUNTERCLOCK_ROT)
-                else if (zeroPos.z < -zThres)
+                else if (zeroRot.z < -gzThres)
                     updateSelection(SensorInput.CLOCK_ROT)
+            }
+        })
+
+        // listener for accelerometer sensor (non-null assertion)
+        accelerometer!!.setListener(object : Accelerometer.Listener {
+            // on movement method
+            override fun onMovement(tx: Float, ty: Float, tz: Float) {
+                if (resetFlag)
+                    resetzeroPos()
+
+                zeroPos.x += tx
+                zeroPos.y += ty
+                zeroPos.z += tz
+
+                reportAccelMetrics(tx, ty, tz, zeroPos)
+
+                // Skip if no selection
+                if (!test_text.hasSelection())
+                    return
+
+                // TODO: Consider better input choice (e.g., using highest value amongst axes)!
+                // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
+
+//                // Y movement
+//                if (zeroPos.y > ayThres)
+//                    updateSelection(SensorInput.FWD)
+//                else if (zeroPos.y < -ayThres)
+//                    updateSelection(SensorInput.AFT)
+//
+//                // X movement
+//                if (zeroPos.x > axThres)
+//                    updateSelection(SensorInput.RIGHT_MOVE)
+//                else if (zeroPos.x < -axThres)
+//                    updateSelection(SensorInput.LEFT_MOVE)
+//
+//                // Z movement
+//                if (zeroPos.z > azThres)
+//                    updateSelection(SensorInput.UP_MOVE)
+//                else if (zeroPos.z < -azThres)
+//                    updateSelection(SensorInput.DOWN_MOVE)
+
+                // Y movement
+                if (ty > ayThres)
+                    updateSelection(SensorInput.FWD)
+                else if (ty < -ayThres)
+                    updateSelection(SensorInput.AFT)
+
+                // X movement
+                if (tx > axThres)
+                    updateSelection(SensorInput.RIGHT_MOVE)
+                else if (tx < -axThres)
+                    updateSelection(SensorInput.LEFT_MOVE)
+
+                // Z movement
+                if (tz > azThres)
+                    updateSelection(SensorInput.UP_MOVE)
+                else if (tz < -azThres)
+                    updateSelection(SensorInput.DOWN_MOVE)
             }
         })
     }
@@ -139,21 +218,32 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         gyroscope?.register()
+        accelerometer?.register()
     }
 
     override fun onPause() {
         super.onPause()
         gyroscope?.unregister()
+        accelerometer?.unregister()
     }
 
-    fun reportMetrics(tx: Float, ty: Float, tz: Float, zeroPos: float3)
+    fun reportGyroMetrics(gtx: Float, gty: Float, gtz: Float, zeroRot: float3)
     {
-        x_text.text = "x: "+tx.toString()
-        y_text.text = "y: "+ty.toString()
-        z_text.text = "z: "+tz.toString()
-        xPos_text.text = "xpos: "+zeroPos.x.toString()
-        yPos_text.text = "ypos: "+zeroPos.y.toString()
-        zPos_text.text = "zpos: "+zeroPos.z.toString()
+        g_x_text.text = "gx: "+gtx.toString()
+        g_y_text.text = "gy: "+gty.toString()
+        g_z_text.text = "gz: "+gtz.toString()
+        xPos_text.text = "gxpos: "+zeroRot.x.toString()
+        yPos_text.text = "gypos: "+zeroRot.y.toString()
+        zPos_text.text = "gzpos: "+zeroRot.z.toString()
+    }
+
+    fun reportAccelMetrics(atx: Float, aty: Float, atz: Float, zeroPos: float3)
+    {
+        a_x_text.text = "ax: "+atx.toString()
+        a_y_text.text = "ay: "+aty.toString()
+        a_z_text.text = "az: "+atz.toString()
+
+        // TODO: Add position to layout!
     }
     
     fun updateSelection(inputType: SensorInput)
@@ -176,6 +266,33 @@ class MainActivity : ComponentActivity() {
         {
             // TODO: Do many things!
         }
+
+        if (inputType == SensorInput.FWD)
+        {
+            // TODO: Do many things!
+        }
+        else if (inputType == SensorInput.AFT)
+        {
+            // TODO: Do many things!
+        }
+
+        if (inputType == SensorInput.RIGHT_MOVE)
+        {
+            extendToRightEdge(test_text.text, test_text.layout)
+        }
+        else if (inputType == SensorInput.LEFT_MOVE)
+        {
+            extendToLeftEdge(test_text.text, test_text.layout)
+        }
+
+        if (inputType == SensorInput.UP_MOVE)
+        {
+            // TODO: Do many things!
+        }
+        else if (inputType == SensorInput.DOWN_MOVE)
+        {
+            // TODO: Do many things!
+        }
     }
 
     fun setZeroButton()
@@ -183,7 +300,13 @@ class MainActivity : ComponentActivity() {
         resetFlag = true
     }
 
-    fun resetZeroPos()
+    fun resetzeroRot()
+    {
+        zeroRot = float3(0.0f, 0.0f, 0.0f)
+        resetFlag = false
+    }
+
+    fun resetzeroPos()
     {
         zeroPos = float3(0.0f, 0.0f, 0.0f)
         resetFlag = false
