@@ -22,6 +22,8 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import java.util.Timer
 
+// Fake Macros, because Kotlin doesn't have them... sad
+val ACCEL_ENABLED: Boolean = false              // whether the linear accelerometer functions are enabled
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
@@ -118,10 +120,14 @@ class MainActivity : ComponentActivity() {
         // Initialize timer
         c_timer = CustomTimer()
 
+        // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
-
             true
+        }
+
+        test_text.setOnClickListener {
+            setZeroButton()
         }
 
         // listener for gyroscope sensor (non-null assertion)
@@ -256,6 +262,7 @@ class MainActivity : ComponentActivity() {
     
     fun updateSelection(inputType: SensorInput)
     {
+        // Gyro stuff
         if (inputType == SensorInput.RIGHT_ROT)
             extendRight(test_text.text, test_text.layout)
         else if (inputType == SensorInput.LEFT_ROT)
@@ -274,6 +281,11 @@ class MainActivity : ComponentActivity() {
         {
             // TODO: Do many things!
         }
+
+        // Linear accelerometer stuff
+        // TODO: Remove after working version!
+        if (!ACCEL_ENABLED)
+            return
 
         if (inputType == SensorInput.FWD)
         {

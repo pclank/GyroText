@@ -1,7 +1,7 @@
 package com.example.gyrotext
 
 class CustomTimer {
-    var startTime: Long = 0
+    var startTime: Long = 0             // in milliseconds
     var delay: Int = 0
     var enabled: Boolean = false
 
