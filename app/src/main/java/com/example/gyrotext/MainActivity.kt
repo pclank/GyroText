@@ -120,10 +120,14 @@ class MainActivity : ComponentActivity() {
         // Initialize timer
         c_timer = CustomTimer()
 
+        // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
-
             true
+        }
+
+        test_text.setOnClickListener {
+            setZeroButton()
         }
 
         // listener for gyroscope sensor (non-null assertion)
