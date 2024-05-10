@@ -1,18 +1,20 @@
 package com.example.gyrotext
 
+import android.R.attr.data
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
-import android.text.Selection.extendToLeftEdge
-import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.Snackbar
+
 
 // Fake Macros, because Kotlin doesn't have them... sad
 val ACCEL_ENABLED: Boolean = true              // whether the linear accelerometer functions are enabled
@@ -131,7 +133,7 @@ class MainActivity : ComponentActivity() {
             // on rotation method of gyroscope
             override fun onRotation(tx: Float, ty: Float, tz: Float) {
                 if (resetFlag)
-                    resetzeroRot()
+                    resetZeroRot()
 
                 zeroRot.x += tx
                 zeroRot.y += ty
@@ -171,7 +173,7 @@ class MainActivity : ComponentActivity() {
             // on movement method
             override fun onMovement(tx: Float, ty: Float, tz: Float) {
                 if (resetFlag)
-                    resetzeroPos()
+                    resetZeroPos()
 
                 zeroPos.x += tx
                 zeroPos.y += ty
@@ -315,7 +317,7 @@ class MainActivity : ComponentActivity() {
                 return
 
             val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
-            handleClipboardClip(selected_text)
+            setClipboardClip(selected_text)
             c_timer.setTimer(2000)
         }
         else if (inputType == SensorInput.DOWN_MOVE)
@@ -324,26 +326,33 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun setZeroButton()
+    private fun setZeroButton()
     {
         resetFlag = true
     }
 
-    fun resetzeroRot()
+    fun resetZeroRot()
     {
         zeroRot = float3(0.0f, 0.0f, 0.0f)
         resetFlag = false
     }
 
-    fun resetzeroPos()
+    fun resetZeroPos()
     {
         zeroPos = float3(0.0f, 0.0f, 0.0f)
         resetFlag = false
     }
 
-    fun handleClipboardClip(new_text: CharSequence)
+    private fun setClipboardClip(new_text: CharSequence)
     {
+        // Copy to clipboard and set as primary clip
         val new_clip = ClipData.newPlainText("label", new_text)
         clipManager.setPrimaryClip(new_clip)
+
+        // Message user
+        Toast.makeText(
+            this, R.string.copy_action_msg,
+            Toast.LENGTH_LONG
+        ).show()
     }
 }
