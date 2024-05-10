@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">GyroText</string>
     <string name="copy_action_msg">Text copied!</string>
+    <string name="left_right_assertion_error">Left-right rep assertion failed. Shoot the devs!</string>
 </resources>

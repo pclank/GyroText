@@ -68,9 +68,13 @@ class MainActivity : ComponentActivity() {
 //    private val axThres = 1.5f
 //    private val ayThres = 1.5f
 //    private val azThres = 1.5f
-    private val axThres = 0.8f
-    private val ayThres = 0.8f
-    private val azThres = 0.8f
+    private val axThres = 3.2f
+    private val ayThres = 3.2f
+    private val azThres = 3.2f
+
+    // Reps for left-right extension functions (kotlin hates unsigned ints???)
+    private val leftRep: Int = 1
+    private val rightRep: Int = 1
 
     // Zero position of phone rotation
     private var zeroRot: float3 = float3(0.0f, 0.0f, 0.0f)
@@ -262,22 +266,46 @@ class MainActivity : ComponentActivity() {
     
     fun updateSelection(inputType: SensorInput)
     {
+        require(rightRep > 0 && leftRep > 0) { R.string.left_right_assertion_error }
+
         // Gyro stuff
         if (inputType == SensorInput.RIGHT_ROT)
-            extendRight(test_text.text, test_text.layout)
+        {
+            for (i in 0 until rightRep)
+                extendRight(test_text.text, test_text.layout)
+
+            return
+        }
         else if (inputType == SensorInput.LEFT_ROT)
-            extendLeft(test_text.text, test_text.layout)
-        
+        {
+            for (i in 0 until leftRep)
+                extendLeft(test_text.text, test_text.layout)
+
+            return
+        }
+
         if (inputType == SensorInput.DOWN_ROT)
+        {
             extendDown(test_text.text, test_text.layout)
+            return
+        }
         else if (inputType == SensorInput.UP_ROT)
+        {
             extendUp(test_text.text, test_text.layout)
+            return
+        }
 
         if (inputType == SensorInput.CLOCK_ROT)
+        {
             extendToRightEdge(test_text.text, test_text.layout)
+            return
+        }
 
         else if (inputType == SensorInput.COUNTERCLOCK_ROT)
+        {
             extendToLeftEdge(test_text.text, test_text.layout)
+            return
+        }
 
         // Linear accelerometer stuff
         // TODO: Remove after working version!
@@ -287,10 +315,12 @@ class MainActivity : ComponentActivity() {
         if (inputType == SensorInput.FWD)
         {
             // TODO: Do many things!
+            return
         }
         else if (inputType == SensorInput.AFT)
         {
             // TODO: Do many things!
+            return
         }
 
 //        if (inputType == SensorInput.RIGHT_MOVE)
@@ -299,7 +329,7 @@ class MainActivity : ComponentActivity() {
 //                return
 //
 //            extendToRightEdge(test_text.text, test_text.layout)
-//            c_timer.setTimer(1000)
+//            c_timer.setTimer(2000)
 //        }
 //        else if (inputType == SensorInput.LEFT_MOVE)
 //        {
@@ -307,7 +337,7 @@ class MainActivity : ComponentActivity() {
 //                return
 //
 //            extendToLeftEdge(test_text.text, test_text.layout)
-//            c_timer.setTimer(1000)
+//            c_timer.setTimer(2000)
 //        }
 
         if (inputType == SensorInput.UP_MOVE)
@@ -318,10 +348,14 @@ class MainActivity : ComponentActivity() {
             val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
             setClipboardClip(selected_text)
             c_timer.setTimer(2000)
+
+            return
         }
         else if (inputType == SensorInput.DOWN_MOVE)
         {
             // TODO: Do many things!
+
+            return
         }
     }
 
