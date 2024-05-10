@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
+import android.text.Selection.extendToLeftEdge
+import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.widget.Button
 import android.widget.EditText
@@ -272,13 +274,10 @@ class MainActivity : ComponentActivity() {
             extendUp(test_text.text, test_text.layout)
 
         if (inputType == SensorInput.CLOCK_ROT)
-        {
-            // TODO: Do many things!
-        }
+            extendToRightEdge(test_text.text, test_text.layout)
+
         else if (inputType == SensorInput.COUNTERCLOCK_ROT)
-        {
-            // TODO: Do many things!
-        }
+            extendToLeftEdge(test_text.text, test_text.layout)
 
         // Linear accelerometer stuff
         // TODO: Remove after working version!
