@@ -111,24 +111,6 @@
         app:layout_constraintStart_toEndOf="@+id/zero_but"
         app:layout_constraintTop_toBottomOf="@+id/y_pos_val" />
 
-<!--    <EditText-->
-<!--        android:id="@+id/test_screen_text"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:enabled="true"-->
-<!--        android:inputType="none"-->
-<!--        android:longClickable="true"-->
-<!--        android:clickable="true"-->
-<!--        android:editable="false"-->
-<!--        android:focusable="true"-->
-<!--        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt ornare mauris, sit amet tempus turpis finibus sit amet. Etiam sed ligula in nunc venenatis venenatis sollicitudin vitae nunc. Maecenas imperdiet turpis felis, sed lobortis quam convallis et. Aenean facilisis vitae velit eget scelerisque. Curabitur eget leo eu magna mollis finibus ac sed nunc. Pellentesque ornare ligula euismod pellentesque ullamcorper. Vestibulum lacinia arcu odio, sit amet mollis elit iaculis nec. Vestibulum egestas in enim quis auctor. Nullam finibus sit amet lectus in aliquam. Phasellus eu orci quis eros elementum malesuada. Nulla quis dictum purus, non tincidunt orci. Proin quis sapien nec purus pretium scelerisque sed nec neque. Quisque faucibus molestie nisl, sed cursus dui pellentesque eu. Vivamus quis accumsan diam. "-->
-<!--        android:textIsSelectable="true"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_bias="0.0"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
     <EditText
         android:id="@+id/test_screen_text"
         android:layout_width="wrap_content"
@@ -139,17 +121,35 @@
         android:clickable="true"
         android:editable="false"
         android:focusable="true"
-        android:text="Βρηκες το ευαισθητο σημειο μου κ αυτο ειναι μειον μου…κ αυτο ειναι μειον μου…πιτογυρο εισαι εσυ το παθος μου κ αυτο ειναι λαθος μου…κ αυτο ειναι λαθος μου!!!
-σε μια ωρα θα εχουν ολα τελειωσει ποσο γρηγορα μπορεις και τα τρως. ας παραγγελναμε ξανα πριν τελειώσει ο τελευταίος γύρος χοιρινοοοος  “γυροςχοιρινος”
-
-Το πιτογυρο μου έπεσε απ τα χέρια , οχι δεν γινεται δεν ειναι δυνατόν , εσυ που μου εταζες τον ουρανό , τ αστέρια, τώρα στον γαμο σου θες να ρθω νηστικός ….
-αν σ’αρνηηθωω σουβλαακιι μουυ κακοο μεγαααλο να βρωω….να μην με θελειιι ο ντελιβεραααρας γυροο να βλεπωω μαυρο…αν σ’αρνηθω φιλωω πιτογυρο κι’ορκο βαρυυυ σου κανωω αν σ’αρνηθωωωωωω σουβλακι μουυυ να πεσωω να πεθανωωω!!!!!!!!!!να πεσω νααααααααααα πε..θαααα..νωωωωω!!!!!!!"
+        android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tincidunt ornare mauris, sit amet tempus turpis finibus sit amet. Etiam sed ligula in nunc venenatis venenatis sollicitudin vitae nunc. Maecenas imperdiet turpis felis, sed lobortis quam convallis et. Aenean facilisis vitae velit eget scelerisque. Curabitur eget leo eu magna mollis finibus ac sed nunc. Pellentesque ornare ligula euismod pellentesque ullamcorper. Vestibulum lacinia arcu odio, sit amet mollis elit iaculis nec. Vestibulum egestas in enim quis auctor. Nullam finibus sit amet lectus in aliquam. Phasellus eu orci quis eros elementum malesuada. Nulla quis dictum purus, non tincidunt orci. Proin quis sapien nec purus pretium scelerisque sed nec neque. Quisque faucibus molestie nisl, sed cursus dui pellentesque eu. Vivamus quis accumsan diam. "
         android:textIsSelectable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+<!--    <EditText-->
+<!--        android:id="@+id/test_screen_text"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:enabled="true"-->
+<!--        android:inputType="none"-->
+<!--        android:longClickable="true"-->
+<!--        android:clickable="true"-->
+<!--        android:editable="false"-->
+<!--        android:focusable="true"-->
+<!--        android:text="Βρηκες το ευαισθητο σημειο μου κ αυτο ειναι μειον μου…κ αυτο ειναι μειον μου…πιτογυρο εισαι εσυ το παθος μου κ αυτο ειναι λαθος μου…κ αυτο ειναι λαθος μου!!!-->
+<!--σε μια ωρα θα εχουν ολα τελειωσει ποσο γρηγορα μπορεις και τα τρως. ας παραγγελναμε ξανα πριν τελειώσει ο τελευταίος γύρος χοιρινοοοος  “γυροςχοιρινος”-->
+
+<!--Το πιτογυρο μου έπεσε απ τα χέρια , οχι δεν γινεται δεν ειναι δυνατόν , εσυ που μου εταζες τον ουρανό , τ αστέρια, τώρα στον γαμο σου θες να ρθω νηστικός ….-->
+<!--αν σ’αρνηηθωω σουβλαακιι μουυ κακοο μεγαααλο να βρωω….να μην με θελειιι ο ντελιβεραααρας γυροο να βλεπωω μαυρο…αν σ’αρνηθω φιλωω πιτογυρο κι’ορκο βαρυυυ σου κανωω αν σ’αρνηθωωωωωω σουβλακι μουυυ να πεσωω να πεθανωωω!!!!!!!!!!να πεσω νααααααααααα πε..θαααα..νωωωωω!!!!!!!"-->
+<!--        android:textIsSelectable="true"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintHorizontal_bias="0.0"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <Button
         android:id="@+id/dev_left_but"

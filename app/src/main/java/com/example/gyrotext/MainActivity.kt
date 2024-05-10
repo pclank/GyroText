@@ -1,29 +1,21 @@
 package com.example.gyrotext
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Bundle
-import android.text.Editable
-import android.text.Selection
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
 import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
-import android.text.Selection.moveUp
-import android.text.Selection.removeSelection
-import android.text.Selection.selectAll
-import android.text.Selection.setSelection
-import android.text.Spannable
-import android.text.SpannableString
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import java.util.Timer
 
 // Fake Macros, because Kotlin doesn't have them... sad
-val ACCEL_ENABLED: Boolean = false              // whether the linear accelerometer functions are enabled
+val ACCEL_ENABLED: Boolean = true              // whether the linear accelerometer functions are enabled
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
@@ -36,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
+    private lateinit var clipManager: ClipboardManager
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
 
@@ -119,6 +112,9 @@ class MainActivity : ComponentActivity() {
 
         // Initialize timer
         c_timer = CustomTimer()
+
+        // Initialize clipboard manager
+        clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
         // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
@@ -296,26 +292,31 @@ class MainActivity : ComponentActivity() {
             // TODO: Do many things!
         }
 
-        if (inputType == SensorInput.RIGHT_MOVE)
-        {
-            if (!c_timer.checkTimer())
-                return
-
-            extendToRightEdge(test_text.text, test_text.layout)
-            c_timer.setTimer(1000)
-        }
-        else if (inputType == SensorInput.LEFT_MOVE)
-        {
-            if (!c_timer.checkTimer())
-                return
-
-            extendToLeftEdge(test_text.text, test_text.layout)
-            c_timer.setTimer(1000)
-        }
+//        if (inputType == SensorInput.RIGHT_MOVE)
+//        {
+//            if (!c_timer.checkTimer())
+//                return
+//
+//            extendToRightEdge(test_text.text, test_text.layout)
+//            c_timer.setTimer(1000)
+//        }
+//        else if (inputType == SensorInput.LEFT_MOVE)
+//        {
+//            if (!c_timer.checkTimer())
+//                return
+//
+//            extendToLeftEdge(test_text.text, test_text.layout)
+//            c_timer.setTimer(1000)
+//        }
 
         if (inputType == SensorInput.UP_MOVE)
         {
-            // TODO: Do many things!
+            if (!c_timer.checkTimer())
+                return
+
+            val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
+            handleClipboardClip(selected_text)
+            c_timer.setTimer(2000)
         }
         else if (inputType == SensorInput.DOWN_MOVE)
         {
@@ -338,5 +339,11 @@ class MainActivity : ComponentActivity() {
     {
         zeroPos = float3(0.0f, 0.0f, 0.0f)
         resetFlag = false
+    }
+
+    fun handleClipboardClip(new_text: CharSequence)
+    {
+        val new_clip = ClipData.newPlainText("label", new_text)
+        clipManager.setPrimaryClip(new_clip)
     }
 }
