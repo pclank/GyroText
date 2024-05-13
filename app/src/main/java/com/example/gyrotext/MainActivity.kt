@@ -1,29 +1,25 @@
 package com.example.gyrotext
 
+import android.R.attr.data
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Bundle
-import android.text.Editable
-import android.text.Selection
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
 import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
-import android.text.Selection.moveUp
-import android.text.Selection.removeSelection
-import android.text.Selection.selectAll
-import android.text.Selection.setSelection
-import android.text.Spannable
-import android.text.SpannableString
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import java.util.Timer
+import androidx.compose.material3.Snackbar
+
 
 // Fake Macros, because Kotlin doesn't have them... sad
-val ACCEL_ENABLED: Boolean = false              // whether the linear accelerometer functions are enabled
+val ACCEL_ENABLED: Boolean = true              // whether the linear accelerometer functions are enabled
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
@@ -36,6 +32,7 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
+    private lateinit var clipManager: ClipboardManager
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
 
@@ -71,9 +68,13 @@ class MainActivity : ComponentActivity() {
 //    private val axThres = 1.5f
 //    private val ayThres = 1.5f
 //    private val azThres = 1.5f
-    private val axThres = 0.8f
-    private val ayThres = 0.8f
-    private val azThres = 0.8f
+    private val axThres = 3.2f
+    private val ayThres = 3.2f
+    private val azThres = 3.2f
+
+    // Reps for left-right extension functions (kotlin hates unsigned ints???)
+    private val leftRep: Int = 1
+    private val rightRep: Int = 1
 
     // Zero position of phone rotation
     private var zeroRot: float3 = float3(0.0f, 0.0f, 0.0f)
@@ -120,6 +121,9 @@ class MainActivity : ComponentActivity() {
         // Initialize timer
         c_timer = CustomTimer()
 
+        // Initialize clipboard manager
+        clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+
         // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
@@ -135,7 +139,7 @@ class MainActivity : ComponentActivity() {
             // on rotation method of gyroscope
             override fun onRotation(tx: Float, ty: Float, tz: Float) {
                 if (resetFlag)
-                    resetzeroRot()
+                    resetZeroRot()
 
                 zeroRot.x += tx
                 zeroRot.y += ty
@@ -175,7 +179,7 @@ class MainActivity : ComponentActivity() {
             // on movement method
             override fun onMovement(tx: Float, ty: Float, tz: Float) {
                 if (resetFlag)
-                    resetzeroPos()
+                    resetZeroPos()
 
                 zeroPos.x += tx
                 zeroPos.y += ty
@@ -262,24 +266,45 @@ class MainActivity : ComponentActivity() {
     
     fun updateSelection(inputType: SensorInput)
     {
+        require(rightRep > 0 && leftRep > 0) { R.string.left_right_assertion_error }
+
         // Gyro stuff
         if (inputType == SensorInput.RIGHT_ROT)
-            extendRight(test_text.text, test_text.layout)
+        {
+            for (i in 0 until rightRep)
+                extendRight(test_text.text, test_text.layout)
+
+            return
+        }
         else if (inputType == SensorInput.LEFT_ROT)
-            extendLeft(test_text.text, test_text.layout)
-        
+        {
+            for (i in 0 until leftRep)
+                extendLeft(test_text.text, test_text.layout)
+
+            return
+        }
+
         if (inputType == SensorInput.DOWN_ROT)
+        {
             extendDown(test_text.text, test_text.layout)
+            return
+        }
         else if (inputType == SensorInput.UP_ROT)
+        {
             extendUp(test_text.text, test_text.layout)
+            return
+        }
 
         if (inputType == SensorInput.CLOCK_ROT)
         {
-            // TODO: Do many things!
+            extendToRightEdge(test_text.text, test_text.layout)
+            return
         }
+
         else if (inputType == SensorInput.COUNTERCLOCK_ROT)
         {
-            // TODO: Do many things!
+            extendToLeftEdge(test_text.text, test_text.layout)
+            return
         }
 
         // Linear accelerometer stuff
@@ -290,53 +315,77 @@ class MainActivity : ComponentActivity() {
         if (inputType == SensorInput.FWD)
         {
             // TODO: Do many things!
+            return
         }
         else if (inputType == SensorInput.AFT)
         {
             // TODO: Do many things!
+            return
         }
 
-        if (inputType == SensorInput.RIGHT_MOVE)
-        {
-            if (!c_timer.checkTimer())
-                return
-
-            extendToRightEdge(test_text.text, test_text.layout)
-            c_timer.setTimer(1000)
-        }
-        else if (inputType == SensorInput.LEFT_MOVE)
-        {
-            if (!c_timer.checkTimer())
-                return
-
-            extendToLeftEdge(test_text.text, test_text.layout)
-            c_timer.setTimer(1000)
-        }
+//        if (inputType == SensorInput.RIGHT_MOVE)
+//        {
+//            if (!c_timer.checkTimer())
+//                return
+//
+//            extendToRightEdge(test_text.text, test_text.layout)
+//            c_timer.setTimer(2000)
+//        }
+//        else if (inputType == SensorInput.LEFT_MOVE)
+//        {
+//            if (!c_timer.checkTimer())
+//                return
+//
+//            extendToLeftEdge(test_text.text, test_text.layout)
+//            c_timer.setTimer(2000)
+//        }
 
         if (inputType == SensorInput.UP_MOVE)
         {
-            // TODO: Do many things!
+            if (!c_timer.checkTimer())
+                return
+
+            val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
+            setClipboardClip(selected_text)
+            c_timer.setTimer(2000)
+
+            return
         }
         else if (inputType == SensorInput.DOWN_MOVE)
         {
             // TODO: Do many things!
+
+            return
         }
     }
 
-    fun setZeroButton()
+    private fun setZeroButton()
     {
         resetFlag = true
     }
 
-    fun resetzeroRot()
+    fun resetZeroRot()
     {
         zeroRot = float3(0.0f, 0.0f, 0.0f)
         resetFlag = false
     }
 
-    fun resetzeroPos()
+    fun resetZeroPos()
     {
         zeroPos = float3(0.0f, 0.0f, 0.0f)
         resetFlag = false
+    }
+
+    private fun setClipboardClip(new_text: CharSequence)
+    {
+        // Copy to clipboard and set as primary clip
+        val new_clip = ClipData.newPlainText("label", new_text)
+        clipManager.setPrimaryClip(new_clip)
+
+        // Message user
+        Toast.makeText(
+            this, R.string.copy_action_msg,
+            Toast.LENGTH_LONG
+        ).show()
     }
 }
