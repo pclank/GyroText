@@ -274,15 +274,23 @@ class MainActivity : ComponentActivity() {
     {
         //Update and show maximum values
         //Angular Acceleration
-        g_maxx_text.text = "gx: "+gmaxtx.toString()
-        g_maxy_text.text = "gy: "+gmaxty.toString()
-        g_maxz_text.text = "gz: "+gmaxtz.toString()
+
+        //g_maxx_text.text = "gx: "+gmaxtx.toString()
+        //g_maxy_text.text = "gy: "+gmaxty.toString()
+        //g_maxz_text.text = "gz: "+gmaxtz.toString()
+        g_maxx_text.setText("gx: " + String.format("%.2f", gmaxtx))
+        g_maxy_text.setText("gy: " + String.format("%.2f", gmaxty))
+        g_maxz_text.setText("gz: " + String.format("%.2f", gmaxtz))
+
         //Tilt
-        maxtiltx_text.text = "x: " + maxtiltx.toString()
-        maxtilty_text.text = "y: " + maxtilty.toString()
-        maxtiltz_text.text = "z: " + maxtiltz.toString()
+        //maxtiltx_text.text = "x: " + maxtiltx.toString()
+        //maxtilty_text.text = "y: " + maxtilty.toString()
+        //maxtiltz_text.text = "z: " + maxtiltz.toString()
+        maxtiltx_text.setText("x: " + String.format("%.2f", maxtiltx))
+        maxtilty_text.setText("y: " + String.format("%.2f", maxtilty))
+        maxtiltz_text.setText("z: " + String.format("%.2f", maxtiltz))
 
-
+        // TODO: Figure out if these are still used. If not delete them from here.
         xPos_text.text = "gxpos: " + zeroRot.x.toString()
         yPos_text.text = "gypos: " + zeroRot.y.toString()
         zPos_text.text = "gzpos: " + zeroRot.z.toString()
