@@ -108,6 +108,7 @@
         android:layout_height="19dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.567"
         app:layout_constraintStart_toEndOf="@+id/y_pos_val"
         app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
 
@@ -156,6 +157,7 @@
         android:layout_height="19dp"
         android:text="TextView"
         app:layout_constraintEnd_toStartOf="@+id/y_pos_val"
+        app:layout_constraintHorizontal_bias="0.386"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
 

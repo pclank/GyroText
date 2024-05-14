@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="Gyrotext">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-05-14T10:55:13.960619600Z">
+        <DropdownSelection timestamp="2024-05-14T15:02:28.765416100Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\angel\.android\avd\Pixel_3a_API_34.avd" />

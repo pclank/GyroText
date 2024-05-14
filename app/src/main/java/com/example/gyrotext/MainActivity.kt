@@ -216,11 +216,11 @@ class MainActivity : ComponentActivity() {
                 zeroPos.y += ty
                 zeroPos.z += tz
 
-                if (ty > 0 && (abs(ty) > maxFwd)) {
-                    maxFwd = abs(ty)
+                if (tz < 0 && (abs(tz) > maxFwd)) {
+                    maxFwd = abs(tz)
                 }
-                else if (ty < 0 && (abs(ty) > maxBwd)) {
-                    maxBwd = abs(ty)
+                else if (tz > 0 && (abs(tz) > maxBwd)) {
+                    maxBwd = abs(tz)
                 }
 
                 reportAccelMetrics(maxFwd, maxBwd, zeroPos)
@@ -298,9 +298,11 @@ class MainActivity : ComponentActivity() {
         maxtiltz_text.text = "z: " + String.format("%.2f", maxtiltz)
 
         // TODO: Figure out if these are still used. If not delete them from here.
-        xPos_text.text = "gxpos: " + zeroRot.x.toString()
-        yPos_text.text = "gypos: " + zeroRot.y.toString()
-        zPos_text.text = "gzpos: " + zeroRot.z.toString()
+        xPos_text.text = "gx: " + String.format("%.2f", zeroRot.x)
+        yPos_text.text = "gy: " + String.format("%.2f", zeroRot.y)
+        zPos_text.text = "gz: " + String.format("%.2f", zeroRot.z)
+
+
     }
 
     fun reportAccelMetrics(mFwd: Float, mBwd: Float, zeroPos: float3)
