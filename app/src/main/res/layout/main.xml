@@ -61,31 +61,25 @@
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="26dp" />
+        app:layout_constraintTop_toBottomOf="@+id/header1" />
 
     <TextView
         android:id="@+id/z_axis_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginStart="97dp"
-        android:layout_marginEnd="21dp"
         android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/maxtiltz_val"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/y_axis_val"
-        tools:layout_editor_absoluteY="81dp" />
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
 
     <TextView
         android:id="@+id/maxtilty_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginStart="94dp"
-        android:layout_marginTop="19dp"
-        android:layout_marginEnd="98dp"
-        android:layout_marginBottom="38dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/test_screen_text"
-        app:layout_constraintEnd_toStartOf="@+id/maxtiltz_val"
-        app:layout_constraintStart_toEndOf="@+id/maxtiltx_val"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
 
     <TextView
@@ -93,17 +87,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TextView"
-        tools:layout_editor_absoluteX="177dp"
-        tools:layout_editor_absoluteY="81dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
 
     <TextView
         android:id="@+id/header2"
         android:layout_width="wrap_content"
         android:layout_height="19dp"
-        android:layout_marginTop="9dp"
-        android:layout_marginBottom="8dp"
         android:text="Maximum Values"
-        app:layout_constraintBottom_toTopOf="@+id/y_axis_val"
+        android:textAlignment="center"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/y_pos_val" />
@@ -112,46 +106,46 @@
         android:id="@+id/z_pos_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginStart="97dp"
         android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/y_pos_val"
-        tools:layout_editor_absoluteY="26dp" />
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
 
     <TextView
         android:id="@+id/x_axis_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="94dp"
         android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/maxtiltx_val"
         app:layout_constraintEnd_toStartOf="@+id/y_axis_val"
-        app:layout_constraintTop_toBottomOf="@+id/x_pos_val" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
 
     <TextView
         android:id="@+id/maxtiltx_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginStart="25dp"
-        android:layout_marginTop="19dp"
         android:text="TextView"
+        app:layout_constraintEnd_toStartOf="@+id/maxtilty_val"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/x_axis_val" />
+        app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
 
     <TextView
         android:id="@+id/maxtiltz_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginTop="19dp"
-        android:layout_marginEnd="21dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/z_axis_val" />
+        app:layout_constraintStart_toEndOf="@+id/maxtilty_val"
+        app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
 
     <TextView
         android:id="@+id/header1"
         android:layout_width="wrap_content"
         android:layout_height="19dp"
         android:text="Current Tilt"
+        android:textAlignment="center"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -160,10 +154,10 @@
         android:id="@+id/x_pos_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
-        android:layout_marginEnd="94dp"
         android:text="TextView"
         app:layout_constraintEnd_toStartOf="@+id/y_pos_val"
-        tools:layout_editor_absoluteY="26dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
 
     <EditText
         android:id="@+id/test_screen_text"
@@ -249,5 +243,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dev_up_but"
         app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/a_maxbwd_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.665"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/maxtilty_val" />
+
+    <TextView
+        android:id="@+id/a_maxfwd_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.337"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/maxtilty_val" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

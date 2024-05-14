@@ -49,6 +49,8 @@ class MainActivity : ComponentActivity() {
     private var maxtx = 0f
     private var maxty = 0f
     private var maxtz = 0f
+    private var maxFwd = 0f
+    private var maxBwd = 0f
 
     // Text for sensor acceleration values
     lateinit var g_maxx_text: TextView
@@ -57,6 +59,8 @@ class MainActivity : ComponentActivity() {
     lateinit var a_x_text: TextView
     lateinit var a_y_text: TextView
     lateinit var a_z_text: TextView
+    lateinit var a_mFwd_text: TextView
+    lateinit var a_mBwd_text: TextView
 
     //Text for tilt values
     lateinit var maxtiltx_text: TextView
@@ -117,6 +121,8 @@ class MainActivity : ComponentActivity() {
         maxtiltx_text = findViewById(R.id.maxtiltx_val)
         maxtilty_text = findViewById(R.id.maxtilty_val)
         maxtiltz_text = findViewById(R.id.maxtiltz_val)
+        a_mFwd_text = findViewById(R.id.a_maxfwd_val)
+        a_mBwd_text = findViewById(R.id.a_maxbwd_val)
 
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
@@ -210,7 +216,14 @@ class MainActivity : ComponentActivity() {
                 zeroPos.y += ty
                 zeroPos.z += tz
 
-                reportAccelMetrics(tx, ty, tz, zeroPos)
+                if (ty > 0 && (abs(ty) > maxFwd)) {
+                    maxFwd = abs(ty)
+                }
+                else if (ty < 0 && (abs(ty) > maxBwd)) {
+                    maxBwd = abs(ty)
+                }
+
+                reportAccelMetrics(maxFwd, maxBwd, zeroPos)
 
                 // Skip if no selection
                 if (!test_text.hasSelection())
@@ -290,11 +303,13 @@ class MainActivity : ComponentActivity() {
         zPos_text.text = "gzpos: " + zeroRot.z.toString()
     }
 
-    fun reportAccelMetrics(atx: Float, aty: Float, atz: Float, zeroPos: float3)
+    fun reportAccelMetrics(mFwd: Float, mBwd: Float, zeroPos: float3)
     {
-        a_x_text.text = "ax: "+atx.toString()
-        a_y_text.text = "ay: "+aty.toString()
-        a_z_text.text = "az: "+atz.toString()
+        //a_x_text.text = "ax: "+atx.toString()
+        //a_y_text.text = "ay: "+aty.toString()
+        //a_z_text.text = "az: "+atz.toString()
+        a_mFwd_text.text = "MaxFWD: " + String.format("%.2f", mFwd)
+        a_mBwd_text.text = "MaxBWD: " + String.format("%.2f", mBwd)
 
         // TODO: Add position to layout!
     }
