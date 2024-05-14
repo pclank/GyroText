@@ -15,6 +15,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import kotlin.math.abs
+import kotlin.math.max
+
 
 
 // Fake Macros, because Kotlin doesn't have them... sad
@@ -167,14 +169,14 @@ class MainActivity : ComponentActivity() {
                 zeroRot.z += tz
 
                 //Maximum tilt values
-                if (abs(zeroRot.x)>maxtx) maxtx = abs(zeroRot.x)
-                if (abs(zeroRot.y)>maxty) maxty = abs(zeroRot.y)
-                if (abs(zeroRot.z)>maxtz) maxtz = abs(zeroRot.z)
+                maxtx = max(maxtx, abs(zeroRot.x))
+                maxty = max(maxty, abs(zeroRot.y))
+                maxtz = max(maxtz, abs(zeroRot.z))
 
                 //Maximum angular acceleration values
-                if (abs(tx) > g_max_x) g_max_x = abs(tx)
-                if (abs(ty) > g_max_y) g_max_y = abs(ty)
-                if (abs(tz) > g_max_z) g_max_z = abs(tz)
+                g_max_x = max(g_max_x, abs(tx))
+                g_max_y = max(g_max_y, abs(ty))
+                g_max_z = max(g_max_z, abs(tz))
 
                 reportGyroMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, zeroRot)
 
@@ -288,19 +290,19 @@ class MainActivity : ComponentActivity() {
         //Update and show maximum values
         //Angular Acceleration
 
-        g_maxx_text.text = "gx: " + String.format("%.2f", gmaxtx)
-        g_maxy_text.text = "gy: " + String.format("%.2f", gmaxty)
-        g_maxz_text.text = "gz: " + String.format("%.2f", gmaxtz)
+        g_maxx_text.text = String.format("%.2f", gmaxtx)
+        g_maxy_text.text = String.format("%.2f", gmaxty)
+        g_maxz_text.text = String.format("%.2f", gmaxtz)
 
         //Tilt
-        maxtiltx_text.text = "x: " + String.format("%.2f", maxtiltx)
-        maxtilty_text.text = "y: " + String.format("%.2f", maxtilty)
-        maxtiltz_text.text = "z: " + String.format("%.2f", maxtiltz)
+        maxtiltx_text.text = String.format("%.2f", maxtiltx)
+        maxtilty_text.text = String.format("%.2f", maxtilty)
+        maxtiltz_text.text = String.format("%.2f", maxtiltz)
 
         // TODO: Figure out if these are still used. If not delete them from here.
-        xPos_text.text = "gx: " + String.format("%.2f", zeroRot.x)
-        yPos_text.text = "gy: " + String.format("%.2f", zeroRot.y)
-        zPos_text.text = "gz: " + String.format("%.2f", zeroRot.z)
+        xPos_text.text = String.format("%.2f", zeroRot.x)
+        yPos_text.text = String.format("%.2f", zeroRot.y)
+        zPos_text.text = String.format("%.2f", zeroRot.z)
 
 
     }
@@ -310,8 +312,8 @@ class MainActivity : ComponentActivity() {
         //a_x_text.text = "ax: "+atx.toString()
         //a_y_text.text = "ay: "+aty.toString()
         //a_z_text.text = "az: "+atz.toString()
-        a_mFwd_text.text = "MaxFWD: " + String.format("%.2f", mFwd)
-        a_mBwd_text.text = "MaxBWD: " + String.format("%.2f", mBwd)
+        a_mFwd_text.text = String.format("%.2f", mFwd)
+        a_mBwd_text.text = String.format("%.2f", mBwd)
 
         // TODO: Add position to layout!
     }

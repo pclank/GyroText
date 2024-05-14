@@ -56,62 +56,29 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/y_pos_val"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header1" />
-
-    <TextView
-        android:id="@+id/z_axis_val"
-        android:layout_width="58dp"
-        android:layout_height="19dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/maxtiltz_val"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/y_axis_val"
-        app:layout_constraintTop_toBottomOf="@+id/header2" />
-
-    <TextView
         android:id="@+id/maxtilty_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
+        android:layout_marginTop="27dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.558"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
+        app:layout_constraintTop_toTopOf="@+id/y_axis_val" />
 
     <TextView
-        android:id="@+id/y_axis_val"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header2" />
-
-    <TextView
-        android:id="@+id/header2"
+        android:id="@+id/mv_gy"
         android:layout_width="wrap_content"
         android:layout_height="19dp"
-        android:text="Maximum Values"
+        android:text="gy: "
         android:textAlignment="center"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/y_pos_val" />
-
-    <TextView
-        android:id="@+id/z_pos_val"
-        android:layout_width="58dp"
-        android:layout_height="19dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.567"
-        app:layout_constraintStart_toEndOf="@+id/y_pos_val"
-        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
+        app:layout_constraintBottom_toTopOf="@+id/mv_y"
+        app:layout_constraintEnd_toStartOf="@+id/y_axis_val"
+        app:layout_constraintHorizontal_bias="0.901"
+        app:layout_constraintStart_toEndOf="@+id/x_axis_val"
+        app:layout_constraintTop_toBottomOf="@+id/header2"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/x_axis_val"
@@ -120,26 +87,249 @@
         android:text="TextView"
         app:layout_constraintBottom_toTopOf="@+id/maxtiltx_val"
         app:layout_constraintEnd_toStartOf="@+id/y_axis_val"
+        app:layout_constraintHorizontal_bias="0.446"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header2" />
+        app:layout_constraintTop_toTopOf="@+id/y_axis_val"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/z_axis_val"
+        android:layout_width="58dp"
+        android:layout_height="19dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/maxtiltz_val"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.638"
+        app:layout_constraintStart_toEndOf="@+id/y_axis_val"
+        app:layout_constraintTop_toTopOf="@+id/y_axis_val"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/mv_y"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginTop="8dp"
+        android:text="y:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/maxtilty_val"
+        app:layout_constraintHorizontal_bias="0.878"
+        app:layout_constraintStart_toEndOf="@+id/maxtiltx_val"
+        app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
 
     <TextView
         android:id="@+id/maxtiltx_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
+        android:layout_marginTop="24dp"
         android:text="TextView"
         app:layout_constraintEnd_toStartOf="@+id/maxtilty_val"
+        app:layout_constraintHorizontal_bias="0.446"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
+        app:layout_constraintTop_toTopOf="@+id/y_axis_val" />
 
     <TextView
         android:id="@+id/maxtiltz_val"
         android:layout_width="58dp"
         android:layout_height="19dp"
+        android:layout_marginTop="27dp"
+        android:layout_marginBottom="8dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/a_maxbwd_val"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintStart_toEndOf="@+id/maxtilty_val"
+        app:layout_constraintTop_toBottomOf="@+id/header2"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/mv_x"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginTop="120dp"
+        android:text="x:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/maxtiltx_val"
+        app:layout_constraintHorizontal_bias="0.843"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mv_gx"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="gx:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/mv_x"
+        app:layout_constraintEnd_toStartOf="@+id/x_axis_val"
+        app:layout_constraintHorizontal_bias="0.825"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/y_axis_val"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/mv_z"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginTop="120dp"
+        android:text="z:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/maxtiltz_val"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintStart_toEndOf="@+id/maxtilty_val"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mv_gz"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="gz:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/z_axis_val"
+        app:layout_constraintHorizontal_bias="0.833"
+        app:layout_constraintStart_toEndOf="@+id/y_axis_val"
+        app:layout_constraintTop_toTopOf="@+id/y_axis_val" />
+
+    <TextView
+        android:id="@+id/y_axis_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/maxtilty_val"
-        app:layout_constraintTop_toBottomOf="@+id/y_axis_val" />
+        app:layout_constraintHorizontal_bias="0.538"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
+
+    <TextView
+        android:id="@+id/MAX_BWD"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginTop="56dp"
+        android:text="Max BWD:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/a_maxbwd_val"
+        app:layout_constraintHorizontal_bias="0.454"
+        app:layout_constraintStart_toEndOf="@+id/a_maxfwd_val"
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
+
+    <TextView
+        android:id="@+id/a_maxbwd_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="56dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.807"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
+
+    <TextView
+        android:id="@+id/a_maxfwd_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="56dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.393"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header2" />
+
+    <TextView
+        android:id="@+id/MAX_FWD"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginTop="150dp"
+        android:text="Max FWD:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/a_maxfwd_val"
+        app:layout_constraintHorizontal_bias="0.815"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/header2"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginTop="36dp"
+        android:text="Maximum Values"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/y_pos_val" />
+
+    <TextView
+        android:id="@+id/ct_gz"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="gz:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/z_pos_val"
+        app:layout_constraintHorizontal_bias="0.791"
+        app:layout_constraintStart_toEndOf="@+id/y_pos_val"
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
+
+    <TextView
+        android:id="@+id/y_pos_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.541"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header1" />
+
+    <TextView
+        android:id="@+id/x_pos_val"
+        android:layout_width="58dp"
+        android:layout_height="19dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toStartOf="@+id/y_pos_val"
+        app:layout_constraintHorizontal_bias="0.434"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
+
+    <TextView
+        android:id="@+id/ct_gy"
+        android:layout_width="22dp"
+        android:layout_height="19dp"
+        android:text="gy: "
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/y_pos_val"
+        app:layout_constraintHorizontal_bias="0.843"
+        app:layout_constraintStart_toEndOf="@+id/x_pos_val"
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
+
+    <TextView
+        android:id="@+id/ct_gx"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:text="gx:"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/x_pos_val"
+        app:layout_constraintHorizontal_bias="0.81"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
+
+    <TextView
+        android:id="@+id/z_pos_val"
+        android:layout_width="58dp"
+        android:layout_height="19dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.62"
+        app:layout_constraintStart_toEndOf="@+id/y_pos_val"
+        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
 
     <TextView
         android:id="@+id/header1"
@@ -151,16 +341,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/x_pos_val"
-        android:layout_width="58dp"
-        android:layout_height="19dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toStartOf="@+id/y_pos_val"
-        app:layout_constraintHorizontal_bias="0.386"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/y_pos_val" />
 
     <EditText
         android:id="@+id/test_screen_text"
@@ -246,25 +426,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dev_up_but"
         app:layout_constraintVertical_bias="1.0" />
-
-    <TextView
-        android:id="@+id/a_maxbwd_val"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.665"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/maxtilty_val" />
-
-    <TextView
-        android:id="@+id/a_maxfwd_val"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.337"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/maxtilty_val" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
