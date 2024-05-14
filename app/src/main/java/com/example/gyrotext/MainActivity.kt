@@ -1,6 +1,5 @@
 package com.example.gyrotext
 
-import android.R.attr.data
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
@@ -15,7 +14,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.material3.Snackbar
+import kotlin.math.abs
 
 
 // Fake Macros, because Kotlin doesn't have them... sad
@@ -43,13 +42,26 @@ class MainActivity : ComponentActivity() {
     lateinit var devUpBut: Button
     lateinit var devDownBut: Button
 
+    // Development metrics values
+    private var g_max_x = 0f
+    private var g_max_y = 0f
+    private var g_max_z = 0f
+    private var maxtx = 0f
+    private var maxty = 0f
+    private var maxtz = 0f
+
     // Text for sensor acceleration values
-    lateinit var g_x_text: TextView
-    lateinit var g_y_text: TextView
-    lateinit var g_z_text: TextView
+    lateinit var g_maxx_text: TextView
+    lateinit var g_maxy_text: TextView
+    lateinit var g_maxz_text: TextView
     lateinit var a_x_text: TextView
     lateinit var a_y_text: TextView
     lateinit var a_z_text: TextView
+
+    //Text for tilt values
+    lateinit var maxtiltx_text: TextView
+    lateinit var maxtilty_text: TextView
+    lateinit var maxtiltz_text: TextView
 
     // Text for inferred phone orientation values
     lateinit var xPos_text: TextView
@@ -92,9 +104,9 @@ class MainActivity : ComponentActivity() {
         devRightBut = findViewById(R.id.dev_right_but)
         devUpBut = findViewById(R.id.dev_up_but)
         devDownBut = findViewById(R.id.dev_down_but)
-        g_x_text = findViewById(R.id.x_axis_val)
-        g_y_text = findViewById(R.id.y_axis_val)
-        g_z_text = findViewById(R.id.z_axis_val)
+        g_maxx_text = findViewById(R.id.x_axis_val)
+        g_maxy_text = findViewById(R.id.y_axis_val)
+        g_maxz_text = findViewById(R.id.z_axis_val)
         a_x_text = findViewById(R.id.a_x_axis_val)
         a_y_text = findViewById(R.id.a_y_axis_val)
         a_z_text = findViewById(R.id.a_z_axis_val)
@@ -102,6 +114,9 @@ class MainActivity : ComponentActivity() {
         yPos_text = findViewById(R.id.y_pos_val)
         zPos_text = findViewById(R.id.z_pos_val)
         test_text = findViewById(R.id.test_screen_text)
+        maxtiltx_text = findViewById(R.id.maxtiltx_val)
+        maxtilty_text = findViewById(R.id.maxtilty_val)
+        maxtiltz_text = findViewById(R.id.maxtiltz_val)
 
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
@@ -145,7 +160,17 @@ class MainActivity : ComponentActivity() {
                 zeroRot.y += ty
                 zeroRot.z += tz
 
-                reportGyroMetrics(tx, ty, tz, zeroRot)
+                //Maximum tilt values
+                if (abs(zeroRot.x)>maxtx) maxtx = abs(zeroRot.x)
+                if (abs(zeroRot.y)>maxty) maxty = abs(zeroRot.y)
+                if (abs(zeroRot.z)>maxtz) maxtz = abs(zeroRot.z)
+
+                //Maximum angular acceleration values
+                if (abs(tx) > g_max_x) g_max_x = abs(tx)
+                if (abs(ty) > g_max_y) g_max_y = abs(ty)
+                if (abs(tz) > g_max_z) g_max_z = abs(tz)
+
+                reportGyroMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, zeroRot)
 
                 // Skip if no selection
                 if (!test_text.hasSelection())
@@ -245,14 +270,22 @@ class MainActivity : ComponentActivity() {
         accelerometer?.unregister()
     }
 
-    fun reportGyroMetrics(gtx: Float, gty: Float, gtz: Float, zeroRot: float3)
+    fun reportGyroMetrics(gmaxtx: Float, gmaxty: Float, gmaxtz : Float, maxtiltx : Float, maxtilty : Float, maxtiltz : Float, zeroRot: float3)
     {
-        g_x_text.text = "gx: "+gtx.toString()
-        g_y_text.text = "gy: "+gty.toString()
-        g_z_text.text = "gz: "+gtz.toString()
-        xPos_text.text = "gxpos: "+zeroRot.x.toString()
-        yPos_text.text = "gypos: "+zeroRot.y.toString()
-        zPos_text.text = "gzpos: "+zeroRot.z.toString()
+        //Update and show maximum values
+        //Angular Acceleration
+        g_maxx_text.text = "gx: "+gmaxtx.toString()
+        g_maxy_text.text = "gy: "+gmaxty.toString()
+        g_maxz_text.text = "gz: "+gmaxtz.toString()
+        //Tilt
+        maxtiltx_text.text = "x: " + maxtiltx.toString()
+        maxtilty_text.text = "y: " + maxtilty.toString()
+        maxtiltz_text.text = "z: " + maxtiltz.toString()
+
+
+        xPos_text.text = "gxpos: " + zeroRot.x.toString()
+        yPos_text.text = "gypos: " + zeroRot.y.toString()
+        zPos_text.text = "gzpos: " + zeroRot.z.toString()
     }
 
     fun reportAccelMetrics(atx: Float, aty: Float, atz: Float, zeroPos: float3)
