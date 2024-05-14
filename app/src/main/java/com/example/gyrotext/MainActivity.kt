@@ -216,10 +216,10 @@ class MainActivity : ComponentActivity() {
                 zeroPos.y += ty
                 zeroPos.z += tz
 
-                if (tz < 0 && (abs(tz) > maxFwd)) {
+                if (tz > 0 && (abs(tz) > maxFwd)) {
                     maxFwd = abs(tz)
                 }
-                else if (tz > 0 && (abs(tz) > maxBwd)) {
+                else if (tz < 0 && (abs(tz) > maxBwd)) {
                     maxBwd = abs(tz)
                 }
 

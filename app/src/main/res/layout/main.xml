@@ -14,6 +14,7 @@
         android:layout_marginTop="652dp"
         android:layout_marginBottom="31dp"
         android:text="zero"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.049"
