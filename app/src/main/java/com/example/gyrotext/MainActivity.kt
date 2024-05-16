@@ -1,8 +1,10 @@
 package com.example.gyrotext
 
+import android.R.attr.delay
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.os.Handler
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
@@ -18,14 +20,13 @@ import kotlin.math.abs
 import kotlin.math.max
 
 
-
 // Fake Macros, because Kotlin doesn't have them... sad
 val ACCEL_ENABLED: Boolean = true              // whether the linear accelerometer functions are enabled
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
     LEFT_ROT, RIGHT_ROT, UP_ROT, DOWN_ROT, CLOCK_ROT, COUNTERCLOCK_ROT,
-    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD, AFT
+    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD_MOVE, AFT_MOVE
 }
 
 class MainActivity : ComponentActivity() {
@@ -234,29 +235,11 @@ class MainActivity : ComponentActivity() {
                 // TODO: Consider better input choice (e.g., using highest value amongst axes)!
                 // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
 
-//                // Y movement
-//                if (zeroPos.y > ayThres)
-//                    updateSelection(SensorInput.FWD)
-//                else if (zeroPos.y < -ayThres)
-//                    updateSelection(SensorInput.AFT)
-//
-//                // X movement
-//                if (zeroPos.x > axThres)
-//                    updateSelection(SensorInput.RIGHT_MOVE)
-//                else if (zeroPos.x < -axThres)
-//                    updateSelection(SensorInput.LEFT_MOVE)
-//
-//                // Z movement
-//                if (zeroPos.z > azThres)
-//                    updateSelection(SensorInput.UP_MOVE)
-//                else if (zeroPos.z < -azThres)
-//                    updateSelection(SensorInput.DOWN_MOVE)
-
                 // Y movement
                 if (ty > ayThres)
-                    updateSelection(SensorInput.FWD)
+                    updateSelection(SensorInput.FWD_MOVE)
                 else if (ty < -ayThres)
-                    updateSelection(SensorInput.AFT)
+                    updateSelection(SensorInput.AFT_MOVE)
 
                 // X movement
                 if (tx > axThres)
@@ -366,12 +349,12 @@ class MainActivity : ComponentActivity() {
         if (!ACCEL_ENABLED)
             return
 
-        if (inputType == SensorInput.FWD)
+        if (inputType == SensorInput.FWD_MOVE)
         {
             // TODO: Do many things!
             return
         }
-        else if (inputType == SensorInput.AFT)
+        else if (inputType == SensorInput.AFT_MOVE)
         {
             // TODO: Do many things!
             return
