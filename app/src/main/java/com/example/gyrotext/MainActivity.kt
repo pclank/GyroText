@@ -101,6 +101,11 @@ class MainActivity : ComponentActivity() {
     // Zero position of phone position (great sentence)
     private var zeroPos: float3 = float3(0.0f, 0.0f, 0.0f)
 
+    // Input handling
+    private var inputHandler: Handler = Handler()
+    private val handlerDelay: Long = 20
+    private var inputList: Array<SensorInput?> = arrayOfNulls<SensorInput>(2)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
@@ -151,12 +156,50 @@ class MainActivity : ComponentActivity() {
         // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
+            inputList = arrayOfNulls(2)             // clear input list
             true
         }
 
         test_text.setOnClickListener {
+            inputList = arrayOfNulls(2)             // clear input list
             setZeroButton()
         }
+
+        inputHandler.postDelayed(object : Runnable {
+            override fun run()
+            {
+                // Handle inputs
+//                if (inputList[0] != null && inputList[1] != null)
+                if (inputList[0] != null)
+                {
+                    var accel_flag = false
+                    // Give priority to accelerometer inputs
+                    if(inputList[0]?.ordinal!! >= 6)
+                    {
+                        inputList[0]?.let { updateSelection(it) }
+                        accel_flag = true
+                    }
+                    else if(inputList[1]?.ordinal!! >= 6)
+                    {
+                        inputList[1]?.let { updateSelection(it) }
+                        accel_flag = true
+                    }
+
+                    if (!accel_flag)
+                    {
+                        inputList[0]?.let { updateSelection(it) }
+                        if (inputList[1] != null)
+                            inputList[1]?.let { updateSelection(it) }
+
+                    }
+
+                    inputList = arrayOfNulls(2)
+                }
+
+                // Set handler
+                inputHandler.postDelayed(this, handlerDelay)
+            }
+        }, handlerDelay)
 
         // listener for gyroscope sensor (non-null assertion)
         gyroscope!!.setListener(object : Gyroscope.Listener {
@@ -189,22 +232,87 @@ class MainActivity : ComponentActivity() {
 
                 // Y rotation
                 if (zeroRot.y > gyThres)
-                    updateSelection(SensorInput.RIGHT_ROT)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.RIGHT_ROT
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.RIGHT_ROT
+                        return
+                    }
+                }
                 else if (zeroRot.y < -gyThres)
-                    updateSelection(SensorInput.LEFT_ROT)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.LEFT_ROT
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.LEFT_ROT
+                        return
+                    }
+                }
 
                 // X rotation
-                // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
                 if (zeroRot.x > gxThres)
-                    updateSelection(SensorInput.DOWN_ROT)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.DOWN_ROT
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.DOWN_ROT
+                        return
+                    }
+                }
                 else if (zeroRot.x < -gxThres)
-                    updateSelection(SensorInput.UP_ROT)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.UP_ROT
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.UP_ROT
+                        return
+                    }
+                }
 
                 // Z rotation
                 if (zeroRot.z > gzThres)
-                    updateSelection(SensorInput.COUNTERCLOCK_ROT)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.COUNTERCLOCK_ROT
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.COUNTERCLOCK_ROT
+                        return
+                    }
+                }
                 else if (zeroRot.z < -gzThres)
-                    updateSelection(SensorInput.CLOCK_ROT)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.CLOCK_ROT
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.CLOCK_ROT
+                        return
+                    }
+                }
             }
         })
 
@@ -237,21 +345,87 @@ class MainActivity : ComponentActivity() {
 
                 // Y movement
                 if (ty > ayThres)
-                    updateSelection(SensorInput.FWD_MOVE)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.FWD_MOVE
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.FWD_MOVE
+                        return
+                    }
+                }
                 else if (ty < -ayThres)
-                    updateSelection(SensorInput.AFT_MOVE)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.AFT_MOVE
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.AFT_MOVE
+                        return
+                    }
+                }
 
                 // X movement
                 if (tx > axThres)
-                    updateSelection(SensorInput.RIGHT_MOVE)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.RIGHT_MOVE
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.RIGHT_MOVE
+                        return
+                    }
+                }
                 else if (tx < -axThres)
-                    updateSelection(SensorInput.LEFT_MOVE)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.LEFT_MOVE
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.LEFT_MOVE
+                        return
+                    }
+                }
 
                 // Z movement
                 if (tz > azThres)
-                    updateSelection(SensorInput.UP_MOVE)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.UP_MOVE
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.UP_MOVE
+                        return
+                    }
+                }
                 else if (tz < -azThres)
-                    updateSelection(SensorInput.DOWN_MOVE)
+                {
+                    if (inputList[0] == null)
+                    {
+                        inputList[0] = SensorInput.DOWN_MOVE
+                        return
+                    }
+                    else if (inputList[1] == null)
+                    {
+                        inputList[1] = SensorInput.DOWN_MOVE
+                        return
+                    }
+                }
             }
         })
     }
