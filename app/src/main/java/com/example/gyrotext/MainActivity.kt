@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
 
     // Input handling
     private var inputHandler: Handler = Handler()
-    private val handlerDelay: Long = 20
+    private val handlerDelay: Long = 5
     private var inputList: Array<SensorInput?> = arrayOfNulls<SensorInput>(2)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,40 +156,42 @@ class MainActivity : ComponentActivity() {
         // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
-            inputList = arrayOfNulls(2)             // clear input list
+//            inputList = arrayOfNulls(2)             // clear input list
             true
         }
 
         test_text.setOnClickListener {
-            inputList = arrayOfNulls(2)             // clear input list
+//            inputList = arrayOfNulls(2)             // clear input list
             setZeroButton()
         }
 
         inputHandler.postDelayed(object : Runnable {
             override fun run()
             {
+                // TODO: Timer that empties the inputList!
+
                 // Handle inputs
 //                if (inputList[0] != null && inputList[1] != null)
                 if (inputList[0] != null)
                 {
                     var accel_flag = false
                     // Give priority to accelerometer inputs
-                    if(inputList[0]?.ordinal!! >= 6)
+                    if(inputList[0]!!.ordinal >= 6)
                     {
-                        inputList[0]?.let { updateSelection(it) }
+                        updateSelection(inputList[0]!!)
                         accel_flag = true
                     }
-                    else if(inputList[1]?.ordinal!! >= 6)
+                    else if(inputList[1] != null && inputList[1]!!.ordinal >= 6)
                     {
-                        inputList[1]?.let { updateSelection(it) }
+                        updateSelection(inputList[1]!!)
                         accel_flag = true
                     }
 
                     if (!accel_flag)
                     {
-                        inputList[0]?.let { updateSelection(it) }
+                        updateSelection(inputList[0]!!)
                         if (inputList[1] != null)
-                            inputList[1]?.let { updateSelection(it) }
+                            updateSelection(inputList[1]!!)
 
                     }
 
@@ -238,7 +240,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.RIGHT_ROT
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.RIGHT_ROT)
                     {
                         inputList[1] = SensorInput.RIGHT_ROT
                         return
@@ -251,7 +253,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.LEFT_ROT
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.LEFT_ROT)
                     {
                         inputList[1] = SensorInput.LEFT_ROT
                         return
@@ -266,7 +268,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.DOWN_ROT
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.DOWN_ROT)
                     {
                         inputList[1] = SensorInput.DOWN_ROT
                         return
@@ -279,7 +281,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.UP_ROT
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.UP_ROT)
                     {
                         inputList[1] = SensorInput.UP_ROT
                         return
@@ -294,7 +296,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.COUNTERCLOCK_ROT
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.COUNTERCLOCK_ROT)
                     {
                         inputList[1] = SensorInput.COUNTERCLOCK_ROT
                         return
@@ -307,7 +309,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.CLOCK_ROT
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.CLOCK_ROT)
                     {
                         inputList[1] = SensorInput.CLOCK_ROT
                         return
@@ -351,7 +353,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.FWD_MOVE
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.FWD_MOVE)
                     {
                         inputList[1] = SensorInput.FWD_MOVE
                         return
@@ -364,7 +366,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.AFT_MOVE
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.AFT_MOVE)
                     {
                         inputList[1] = SensorInput.AFT_MOVE
                         return
@@ -379,7 +381,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.RIGHT_MOVE
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.RIGHT_MOVE)
                     {
                         inputList[1] = SensorInput.RIGHT_MOVE
                         return
@@ -392,7 +394,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.LEFT_MOVE
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.LEFT_MOVE)
                     {
                         inputList[1] = SensorInput.LEFT_MOVE
                         return
@@ -407,7 +409,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.UP_MOVE
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.UP_MOVE)
                     {
                         inputList[1] = SensorInput.UP_MOVE
                         return
@@ -420,7 +422,7 @@ class MainActivity : ComponentActivity() {
                         inputList[0] = SensorInput.DOWN_MOVE
                         return
                     }
-                    else if (inputList[1] == null)
+                    else if (inputList[1] == null && inputList[0] != SensorInput.DOWN_MOVE)
                     {
                         inputList[1] = SensorInput.DOWN_MOVE
                         return
