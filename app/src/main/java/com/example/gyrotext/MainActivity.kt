@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
         accelerometer!!.setup(this)
 
         // Initialize timer
-        c_timer = CustomTimer()
+        c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
 
         // Initialize clipboard manager
         clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -384,7 +384,8 @@ class MainActivity : ComponentActivity() {
 
             val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
             setClipboardClip(selected_text)
-            c_timer.setTimer(2000)
+
+            c_timer.setTimer(2000, SensorInput.UP_MOVE)
 
             return
         }
