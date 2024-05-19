@@ -26,7 +26,7 @@ val ACCEL_ENABLED: Boolean = true              // whether the linear acceleromet
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
     LEFT_ROT, RIGHT_ROT, UP_ROT, DOWN_ROT, CLOCK_ROT, COUNTERCLOCK_ROT,
-    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD_MOVE, AFT_MOVE
+    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD_MOVE, AFT_MOVE, NONE
 }
 
 class MainActivity : ComponentActivity() {
@@ -104,7 +104,8 @@ class MainActivity : ComponentActivity() {
     // Input handling
     private var inputHandler: Handler = Handler()
     private val handlerDelay: Long = 5
-    private var inputList: Array<SensorInput?> = arrayOfNulls<SensorInput>(2)
+    @Volatile
+    private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,12 +157,12 @@ class MainActivity : ComponentActivity() {
         // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
-//            inputList = arrayOfNulls(2)             // clear input list
+            inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)             // clear input list
             true
         }
 
         test_text.setOnClickListener {
-//            inputList = arrayOfNulls(2)             // clear input list
+            inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)             // clear input list
             setZeroButton()
         }
 
@@ -172,30 +173,30 @@ class MainActivity : ComponentActivity() {
 
                 // Handle inputs
 //                if (inputList[0] != null && inputList[1] != null)
-                if (inputList[0] != null)
+                if (inputList[0] != SensorInput.NONE)
                 {
-                    var accel_flag = false
-                    // Give priority to accelerometer inputs
-                    if(inputList[0]!!.ordinal >= 6)
+                    var accel_index = -1
+
+                    // Check for acceleration input
+                    if (inputList[0].ordinal >= 6)
+                        accel_index = 0
+                    else if (inputList[1] != SensorInput.NONE && inputList[1].ordinal >= 6)
+                        accel_index = 1
+
+                    // Give priority to accelerometer input
+                    if (accel_index != -1)
                     {
-                        updateSelection(inputList[0]!!)
-                        accel_flag = true
+                        updateSelection(inputList[accel_index])
+                        inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
                     }
-                    else if(inputList[1] != null && inputList[1]!!.ordinal >= 6)
+                    // If acceleration input doesn't exist
+                    else
                     {
-                        updateSelection(inputList[1]!!)
-                        accel_flag = true
+                        updateSelection(inputList[0])
+                        inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
                     }
 
-                    if (!accel_flag)
-                    {
-                        updateSelection(inputList[0]!!)
-                        if (inputList[1] != null)
-                            updateSelection(inputList[1]!!)
-
-                    }
-
-                    inputList = arrayOfNulls(2)
+                    inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
                 }
 
                 // Set handler
@@ -235,12 +236,12 @@ class MainActivity : ComponentActivity() {
                 // Y rotation
                 if (zeroRot.y > gyThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.RIGHT_ROT
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.RIGHT_ROT)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.RIGHT_ROT)
                     {
                         inputList[1] = SensorInput.RIGHT_ROT
                         return
@@ -248,12 +249,12 @@ class MainActivity : ComponentActivity() {
                 }
                 else if (zeroRot.y < -gyThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.LEFT_ROT
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.LEFT_ROT)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.LEFT_ROT)
                     {
                         inputList[1] = SensorInput.LEFT_ROT
                         return
@@ -263,12 +264,12 @@ class MainActivity : ComponentActivity() {
                 // X rotation
                 if (zeroRot.x > gxThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.DOWN_ROT
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.DOWN_ROT)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.DOWN_ROT)
                     {
                         inputList[1] = SensorInput.DOWN_ROT
                         return
@@ -276,12 +277,12 @@ class MainActivity : ComponentActivity() {
                 }
                 else if (zeroRot.x < -gxThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.UP_ROT
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.UP_ROT)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.UP_ROT)
                     {
                         inputList[1] = SensorInput.UP_ROT
                         return
@@ -291,12 +292,12 @@ class MainActivity : ComponentActivity() {
                 // Z rotation
                 if (zeroRot.z > gzThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.COUNTERCLOCK_ROT
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.COUNTERCLOCK_ROT)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.COUNTERCLOCK_ROT)
                     {
                         inputList[1] = SensorInput.COUNTERCLOCK_ROT
                         return
@@ -304,12 +305,12 @@ class MainActivity : ComponentActivity() {
                 }
                 else if (zeroRot.z < -gzThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.CLOCK_ROT
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.CLOCK_ROT)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.CLOCK_ROT)
                     {
                         inputList[1] = SensorInput.CLOCK_ROT
                         return
@@ -346,70 +347,70 @@ class MainActivity : ComponentActivity() {
                 // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
 
                 // Y movement
-                if (ty > ayThres)
-                {
-                    if (inputList[0] == null)
-                    {
-                        inputList[0] = SensorInput.FWD_MOVE
-                        return
-                    }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.FWD_MOVE)
-                    {
-                        inputList[1] = SensorInput.FWD_MOVE
-                        return
-                    }
-                }
-                else if (ty < -ayThres)
-                {
-                    if (inputList[0] == null)
-                    {
-                        inputList[0] = SensorInput.AFT_MOVE
-                        return
-                    }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.AFT_MOVE)
-                    {
-                        inputList[1] = SensorInput.AFT_MOVE
-                        return
-                    }
-                }
+//                if (ty > ayThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.FWD_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.FWD_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.FWD_MOVE
+//                        return
+//                    }
+//                }
+//                else if (ty < -ayThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.AFT_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.AFT_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.AFT_MOVE
+//                        return
+//                    }
+//                }
 
                 // X movement
-                if (tx > axThres)
-                {
-                    if (inputList[0] == null)
-                    {
-                        inputList[0] = SensorInput.RIGHT_MOVE
-                        return
-                    }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.RIGHT_MOVE)
-                    {
-                        inputList[1] = SensorInput.RIGHT_MOVE
-                        return
-                    }
-                }
-                else if (tx < -axThres)
-                {
-                    if (inputList[0] == null)
-                    {
-                        inputList[0] = SensorInput.LEFT_MOVE
-                        return
-                    }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.LEFT_MOVE)
-                    {
-                        inputList[1] = SensorInput.LEFT_MOVE
-                        return
-                    }
-                }
+//                if (tx > axThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.RIGHT_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.RIGHT_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.RIGHT_MOVE
+//                        return
+//                    }
+//                }
+//                else if (tx < -axThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.LEFT_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.LEFT_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.LEFT_MOVE
+//                        return
+//                    }
+//                }
 
                 // Z movement
                 if (tz > azThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.UP_MOVE
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.UP_MOVE)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.UP_MOVE)
                     {
                         inputList[1] = SensorInput.UP_MOVE
                         return
@@ -417,12 +418,12 @@ class MainActivity : ComponentActivity() {
                 }
                 else if (tz < -azThres)
                 {
-                    if (inputList[0] == null)
+                    if (inputList[0] == SensorInput.NONE)
                     {
                         inputList[0] = SensorInput.DOWN_MOVE
                         return
                     }
-                    else if (inputList[1] == null && inputList[0] != SensorInput.DOWN_MOVE)
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.DOWN_MOVE)
                     {
                         inputList[1] = SensorInput.DOWN_MOVE
                         return
