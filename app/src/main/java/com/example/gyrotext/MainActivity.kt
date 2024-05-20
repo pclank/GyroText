@@ -11,6 +11,7 @@ import android.text.Selection.extendRight
 import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
+import android.text.Selection.removeSelection
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -166,6 +167,7 @@ class MainActivity : ComponentActivity() {
             setZeroButton()
         }
 
+        // Input handler
         inputHandler.postDelayed(object : Runnable {
             override fun run()
             {
@@ -559,9 +561,14 @@ class MainActivity : ComponentActivity() {
             if (!c_timer.checkTimer())
                 return
 
+            // Set text to clipboard
             val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
             setClipboardClip(selected_text)
 
+            // Remove selection after copy
+            removeSelection(test_text.text)
+
+            // Start timer
             c_timer.setTimer(2000, SensorInput.UP_MOVE)
 
             return
