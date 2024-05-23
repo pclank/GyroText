@@ -1,9 +1,9 @@
 package com.example.gyrotext
 
-import android.R.attr.delay
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
@@ -17,6 +17,8 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -35,6 +37,8 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
+    private lateinit var log_timer: CustomTimer
+    private lateinit var sensorLog: SensorLog
     private lateinit var clipManager: ClipboardManager
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
@@ -105,6 +109,7 @@ class MainActivity : ComponentActivity() {
     // Input handling
     private var inputHandler: Handler = Handler()
     private val handlerDelay: Long = 5
+
     @Volatile
     private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
@@ -134,11 +139,16 @@ class MainActivity : ComponentActivity() {
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
 
+        // Initialize sensor log
+        sensorLog = SensorLog(DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
         devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
         devRightBut.setOnClickListener { updateSelection(SensorInput.RIGHT_ROT) }
-        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
+//        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
+        devUpBut.setOnClickListener { sensorLog.WriteLog(getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath) }
+        sensorLog.WriteLog(getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath)
         devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
 
         // Initialize and set up gyroscope
@@ -148,9 +158,14 @@ class MainActivity : ComponentActivity() {
         // Initialize and set up accelerometer
         accelerometer = Accelerometer(this)
         accelerometer!!.setup(this)
+//        val dir = getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath
+
 
         // Initialize timer
         c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
+
+        // Initialize log timer
+        log_timer = CustomTimer(System.currentTimeMillis(), 500, false, SensorInput.NONE)
 
         // Initialize clipboard manager
         clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -216,6 +231,17 @@ class MainActivity : ComponentActivity() {
                 zeroRot.x += tx
                 zeroRot.y += ty
                 zeroRot.z += tz
+
+                // Log value
+                if (log_timer.checkTimer())
+                {
+                    sensorLog.x_gyro.add(zeroRot.x)
+                    sensorLog.y_gyro.add(zeroRot.y)
+                    sensorLog.z_gyro.add(zeroRot.z)
+                    sensorLog.list_size++
+
+                    log_timer.setTimer(500, SensorInput.NONE)
+                }
 
                 //Maximum tilt values
                 maxtx = max(maxtx, abs(zeroRot.x))
