@@ -37,8 +37,10 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
-    private lateinit var log_timer: CustomTimer
-    private lateinit var sensorLog: SensorLog
+    private lateinit var gyro_log_timer: CustomTimer
+    private lateinit var accel_log_timer: CustomTimer
+    private lateinit var gyroSensorLog: GyroSensorLog
+    private lateinit var accelSensorLog: AccelSensorLog
     private lateinit var clipManager: ClipboardManager
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
@@ -139,16 +141,19 @@ class MainActivity : ComponentActivity() {
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
 
-        // Initialize sensor log
-        sensorLog = SensorLog(DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+        // Initialize sensor logs
+        gyroSensorLog = GyroSensorLog(DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
+        accelSensorLog = AccelSensorLog(DateTimeFormatter.ISO_INSTANT.format(Instant.now()))
 
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
         devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
         devRightBut.setOnClickListener { updateSelection(SensorInput.RIGHT_ROT) }
 //        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
-        devUpBut.setOnClickListener { sensorLog.WriteLog(getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath) }
-        sensorLog.WriteLog(getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath)
+        devUpBut.setOnClickListener {
+            gyroSensorLog.WriteLog(getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath)
+            accelSensorLog.WriteLog(getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath)
+        }
         devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
 
         // Initialize and set up gyroscope
@@ -164,8 +169,9 @@ class MainActivity : ComponentActivity() {
         // Initialize timer
         c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
 
-        // Initialize log timer
-        log_timer = CustomTimer(System.currentTimeMillis(), 500, false, SensorInput.NONE)
+        // Initialize log timers
+        gyro_log_timer = CustomTimer(System.currentTimeMillis(), 500, false, SensorInput.NONE)
+        accel_log_timer = CustomTimer(System.currentTimeMillis(), 500, false, SensorInput.NONE)
 
         // Initialize clipboard manager
         clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -232,15 +238,15 @@ class MainActivity : ComponentActivity() {
                 zeroRot.y += ty
                 zeroRot.z += tz
 
-                // Log value
-                if (log_timer.checkTimer())
+                // Log values
+                if (gyro_log_timer.checkTimer())
                 {
-                    sensorLog.x_gyro.add(zeroRot.x)
-                    sensorLog.y_gyro.add(zeroRot.y)
-                    sensorLog.z_gyro.add(zeroRot.z)
-                    sensorLog.list_size++
+                    gyroSensorLog.x_gyro.add(zeroRot.x)
+                    gyroSensorLog.y_gyro.add(zeroRot.y)
+                    gyroSensorLog.z_gyro.add(zeroRot.z)
+                    gyroSensorLog.list_size++
 
-                    log_timer.setTimer(500, SensorInput.NONE)
+                    gyro_log_timer.setTimer(500, SensorInput.NONE)
                 }
 
                 //Maximum tilt values
@@ -357,6 +363,17 @@ class MainActivity : ComponentActivity() {
                 zeroPos.x += tx
                 zeroPos.y += ty
                 zeroPos.z += tz
+
+                // Log values
+                if (accel_log_timer.checkTimer())
+                {
+                    accelSensorLog.x_accel.add(tx)
+                    accelSensorLog.y_accel.add(ty)
+                    accelSensorLog.z_accel.add(tz)
+                    accelSensorLog.list_size++
+
+                    accel_log_timer.setTimer(500, SensorInput.NONE)
+                }
 
                 if (tz > 0 && (abs(tz) > maxFwd)) {
                     maxFwd = abs(tz)
