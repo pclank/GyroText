@@ -413,6 +413,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun saveMetrics(gxmax: Float, gymax: Float, gzmax: Float, tiltxmax: Float, tiltymax: Float, tiltzmax: Float, maxFWD: Float, maxBWD: Float){
+        // TODO: call this somewhere at the end of the experiment
+        val metrics = Metrics(gxmax, gymax, gzmax, tiltxmax, tiltymax, tiltzmax, maxFWD, maxBWD)
+        // metrics.saveToJSON(context, "metrics.json")
+    }
+
     private fun setZeroButton()
     {
         resetFlag = true
