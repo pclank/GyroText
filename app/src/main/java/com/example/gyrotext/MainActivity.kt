@@ -3,6 +3,7 @@ package com.example.gyrotext
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.os.Environment
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
@@ -419,8 +420,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun saveMetrics(gxmax: Float, gymax: Float, gzmax: Float, tiltxmax: Float, tiltymax: Float, tiltzmax: Float, maxFWD: Float, maxBWD: Float){
+        val externalStorageDir = getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath
+
         val metrics = Metrics(gxmax, gymax, gzmax, tiltxmax, tiltymax, tiltzmax, maxFWD, maxBWD)
-        metrics.saveToJSON(this, "metrics.json")
+        metrics.saveToJSON(this, "metrics.json", externalStorageDir)
     }
 
     private fun setZeroButton()
