@@ -6,7 +6,7 @@ import java.io.File
 
 data class Metrics(
 
-    // TODO: Get the user ID as a variable fo the data class.
+    // TODO: Get the user ID as a variable for the data class.
     var gxmax: Float,
     var gymax: Float,
     var gzmax: Float,
@@ -23,5 +23,6 @@ data class Metrics(
 
         val file = File(context.filesDir, fileName)
         file.writeText(jsonString)
+        println("File saved to: ${file.absolutePath}")
     }
 }
