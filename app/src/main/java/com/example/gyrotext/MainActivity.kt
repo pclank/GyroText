@@ -5,6 +5,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Environment
+action_deconfliction_to_master
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
@@ -45,6 +47,7 @@ class MainActivity : ComponentActivity() {
     lateinit var devRightBut: Button
     lateinit var devUpBut: Button
     lateinit var devDownBut: Button
+    lateinit var testMetricsBut: Button
 
     // Development metrics values
     private var g_max_x = 0f
@@ -118,6 +121,7 @@ class MainActivity : ComponentActivity() {
         devRightBut = findViewById(R.id.dev_right_but)
         devUpBut = findViewById(R.id.dev_up_but)
         devDownBut = findViewById(R.id.dev_down_but)
+        testMetricsBut = findViewById(R.id.testing_but)
         g_maxx_text = findViewById(R.id.x_axis_val)
         g_maxy_text = findViewById(R.id.y_axis_val)
         g_maxz_text = findViewById(R.id.z_axis_val)
@@ -140,6 +144,9 @@ class MainActivity : ComponentActivity() {
         devRightBut.setOnClickListener { updateSelection(SensorInput.RIGHT_ROT) }
         devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
         devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
+        testMetricsBut.setOnClickListener {
+            saveMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, maxFwd, maxBwd)
+        }
 
         // Initialize and set up gyroscope
         gyroscope = Gyroscope(this)
@@ -579,6 +586,13 @@ class MainActivity : ComponentActivity() {
 
             return
         }
+    }
+
+    private fun saveMetrics(gxmax: Float, gymax: Float, gzmax: Float, tiltxmax: Float, tiltymax: Float, tiltzmax: Float, maxFWD: Float, maxBWD: Float){
+        val externalStorageDir = getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath
+
+        val metrics = Metrics(gxmax, gymax, gzmax, tiltxmax, tiltymax, tiltzmax, maxFWD, maxBWD)
+        metrics.saveToJSON(this, "metrics.json", externalStorageDir)
     }
 
     private fun setZeroButton()

@@ -221,12 +221,12 @@
         android:id="@+id/a_maxbwd_val"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="11dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.807"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/header2" />
+        app:layout_constraintTop_toBottomOf="@+id/mv_z" />
 
     <TextView
         android:id="@+id/a_maxfwd_val"
@@ -426,5 +426,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dev_up_but"
         app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/testing_but"
+        android:layout_width="84dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="12dp"
+        android:text="Test"
+        app:layout_constraintStart_toEndOf="@+id/dev_down_but"
+        app:layout_constraintTop_toBottomOf="@+id/dev_right_but" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
