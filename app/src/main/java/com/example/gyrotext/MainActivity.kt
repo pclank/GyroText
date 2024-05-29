@@ -1,15 +1,19 @@
 package com.example.gyrotext
 
+import android.R.attr.delay
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.os.Handler
 import android.os.Environment
+action_deconfliction_to_master
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
 import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
+import android.text.Selection.removeSelection
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -19,14 +23,13 @@ import kotlin.math.abs
 import kotlin.math.max
 
 
-
 // Fake Macros, because Kotlin doesn't have them... sad
 val ACCEL_ENABLED: Boolean = true              // whether the linear accelerometer functions are enabled
 
 // Enum that contains all inputs for all of our sensors (i.e., gyroscope and accelerometer)
 enum class SensorInput {
     LEFT_ROT, RIGHT_ROT, UP_ROT, DOWN_ROT, CLOCK_ROT, COUNTERCLOCK_ROT,
-    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD, AFT
+    LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD_MOVE, AFT_MOVE, NONE
 }
 
 class MainActivity : ComponentActivity() {
@@ -102,6 +105,12 @@ class MainActivity : ComponentActivity() {
     // Zero position of phone position (great sentence)
     private var zeroPos: float3 = float3(0.0f, 0.0f, 0.0f)
 
+    // Input handling
+    private var inputHandler: Handler = Handler()
+    private val handlerDelay: Long = 5
+    @Volatile
+    private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
@@ -148,7 +157,7 @@ class MainActivity : ComponentActivity() {
         accelerometer!!.setup(this)
 
         // Initialize timer
-        c_timer = CustomTimer()
+        c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
 
         // Initialize clipboard manager
         clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -156,12 +165,53 @@ class MainActivity : ComponentActivity() {
         // Listeners to zero gyro position on text click
         test_text.setOnLongClickListener {
             setZeroButton()
+            inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)             // clear input list
             true
         }
 
         test_text.setOnClickListener {
+            inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)             // clear input list
             setZeroButton()
         }
+
+        // Input handler
+        inputHandler.postDelayed(object : Runnable {
+            override fun run()
+            {
+                // TODO: Timer that empties the inputList!
+
+                // Handle inputs
+//                if (inputList[0] != null && inputList[1] != null)
+                if (inputList[0] != SensorInput.NONE)
+                {
+                    var accel_index = -1
+
+                    // Check for acceleration input
+                    if (inputList[0].ordinal >= 6)
+                        accel_index = 0
+                    else if (inputList[1] != SensorInput.NONE && inputList[1].ordinal >= 6)
+                        accel_index = 1
+
+                    // Give priority to accelerometer input
+                    if (accel_index != -1)
+                    {
+                        updateSelection(inputList[accel_index])
+                        inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
+                    }
+                    // If acceleration input doesn't exist
+                    else
+                    {
+                        updateSelection(inputList[0])
+                        inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
+                    }
+
+                    inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
+                }
+
+                // Set handler
+                inputHandler.postDelayed(this, handlerDelay)
+            }
+        }, handlerDelay)
 
         // listener for gyroscope sensor (non-null assertion)
         gyroscope!!.setListener(object : Gyroscope.Listener {
@@ -194,22 +244,87 @@ class MainActivity : ComponentActivity() {
 
                 // Y rotation
                 if (zeroRot.y > gyThres)
-                    updateSelection(SensorInput.RIGHT_ROT)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.RIGHT_ROT
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.RIGHT_ROT)
+                    {
+                        inputList[1] = SensorInput.RIGHT_ROT
+                        return
+                    }
+                }
                 else if (zeroRot.y < -gyThres)
-                    updateSelection(SensorInput.LEFT_ROT)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.LEFT_ROT
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.LEFT_ROT)
+                    {
+                        inputList[1] = SensorInput.LEFT_ROT
+                        return
+                    }
+                }
 
                 // X rotation
-                // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
                 if (zeroRot.x > gxThres)
-                    updateSelection(SensorInput.DOWN_ROT)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.DOWN_ROT
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.DOWN_ROT)
+                    {
+                        inputList[1] = SensorInput.DOWN_ROT
+                        return
+                    }
+                }
                 else if (zeroRot.x < -gxThres)
-                    updateSelection(SensorInput.UP_ROT)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.UP_ROT
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.UP_ROT)
+                    {
+                        inputList[1] = SensorInput.UP_ROT
+                        return
+                    }
+                }
 
                 // Z rotation
                 if (zeroRot.z > gzThres)
-                    updateSelection(SensorInput.COUNTERCLOCK_ROT)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.COUNTERCLOCK_ROT
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.COUNTERCLOCK_ROT)
+                    {
+                        inputList[1] = SensorInput.COUNTERCLOCK_ROT
+                        return
+                    }
+                }
                 else if (zeroRot.z < -gzThres)
-                    updateSelection(SensorInput.CLOCK_ROT)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.CLOCK_ROT
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.CLOCK_ROT)
+                    {
+                        inputList[1] = SensorInput.CLOCK_ROT
+                        return
+                    }
+                }
             }
         })
 
@@ -240,41 +355,89 @@ class MainActivity : ComponentActivity() {
                 // TODO: Consider better input choice (e.g., using highest value amongst axes)!
                 // TODO: Stuff here should be delayed a bit by a timer of sorts for better UX!
 
-//                // Y movement
-//                if (zeroPos.y > ayThres)
-//                    updateSelection(SensorInput.FWD)
-//                else if (zeroPos.y < -ayThres)
-//                    updateSelection(SensorInput.AFT)
-//
-//                // X movement
-//                if (zeroPos.x > axThres)
-//                    updateSelection(SensorInput.RIGHT_MOVE)
-//                else if (zeroPos.x < -axThres)
-//                    updateSelection(SensorInput.LEFT_MOVE)
-//
-//                // Z movement
-//                if (zeroPos.z > azThres)
-//                    updateSelection(SensorInput.UP_MOVE)
-//                else if (zeroPos.z < -azThres)
-//                    updateSelection(SensorInput.DOWN_MOVE)
-
                 // Y movement
-                if (ty > ayThres)
-                    updateSelection(SensorInput.FWD)
-                else if (ty < -ayThres)
-                    updateSelection(SensorInput.AFT)
+//                if (ty > ayThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.FWD_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.FWD_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.FWD_MOVE
+//                        return
+//                    }
+//                }
+//                else if (ty < -ayThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.AFT_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.AFT_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.AFT_MOVE
+//                        return
+//                    }
+//                }
 
                 // X movement
-                if (tx > axThres)
-                    updateSelection(SensorInput.RIGHT_MOVE)
-                else if (tx < -axThres)
-                    updateSelection(SensorInput.LEFT_MOVE)
+//                if (tx > axThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.RIGHT_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.RIGHT_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.RIGHT_MOVE
+//                        return
+//                    }
+//                }
+//                else if (tx < -axThres)
+//                {
+//                    if (inputList[0] == SensorInput.NONE)
+//                    {
+//                        inputList[0] = SensorInput.LEFT_MOVE
+//                        return
+//                    }
+//                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.LEFT_MOVE)
+//                    {
+//                        inputList[1] = SensorInput.LEFT_MOVE
+//                        return
+//                    }
+//                }
 
                 // Z movement
                 if (tz > azThres)
-                    updateSelection(SensorInput.UP_MOVE)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.UP_MOVE
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.UP_MOVE)
+                    {
+                        inputList[1] = SensorInput.UP_MOVE
+                        return
+                    }
+                }
                 else if (tz < -azThres)
-                    updateSelection(SensorInput.DOWN_MOVE)
+                {
+                    if (inputList[0] == SensorInput.NONE)
+                    {
+                        inputList[0] = SensorInput.DOWN_MOVE
+                        return
+                    }
+                    else if (inputList[1] == SensorInput.NONE && inputList[0] != SensorInput.DOWN_MOVE)
+                    {
+                        inputList[1] = SensorInput.DOWN_MOVE
+                        return
+                    }
+                }
             }
         })
     }
@@ -372,12 +535,12 @@ class MainActivity : ComponentActivity() {
         if (!ACCEL_ENABLED)
             return
 
-        if (inputType == SensorInput.FWD)
+        if (inputType == SensorInput.FWD_MOVE)
         {
             // TODO: Do many things!
             return
         }
-        else if (inputType == SensorInput.AFT)
+        else if (inputType == SensorInput.AFT_MOVE)
         {
             // TODO: Do many things!
             return
@@ -405,9 +568,15 @@ class MainActivity : ComponentActivity() {
             if (!c_timer.checkTimer())
                 return
 
+            // Set text to clipboard
             val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
             setClipboardClip(selected_text)
-            c_timer.setTimer(2000)
+
+            // Remove selection after copy
+            removeSelection(test_text.text)
+
+            // Start timer
+            c_timer.setTimer(2000, SensorInput.UP_MOVE)
 
             return
         }
