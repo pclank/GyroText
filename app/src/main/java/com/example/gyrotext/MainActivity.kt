@@ -3,10 +3,12 @@ package com.example.gyrotext
 import android.R.attr.delay
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Environment
-action_deconfliction_to_master
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
@@ -14,11 +16,13 @@ import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.text.Selection.removeSelection
+import android.view.HapticFeedbackConstants
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -40,6 +44,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var clipManager: ClipboardManager
     lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
+
+    // Vibrator
+    private lateinit var vibrator: Vibrator
 
     // Development buttons
     // TODO: Remove or hide in release version
@@ -111,6 +118,7 @@ class MainActivity : ComponentActivity() {
     @Volatile
     private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
@@ -158,6 +166,8 @@ class MainActivity : ComponentActivity() {
 
         // Initialize timer
         c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
+
+        vibrator = getSystemService(Vibrator::class.java)
 
         // Initialize clipboard manager
         clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -487,6 +497,7 @@ class MainActivity : ComponentActivity() {
         // TODO: Add position to layout!
     }
     
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun updateSelection(inputType: SensorInput)
     {
         require(rightRep > 0 && leftRep > 0) { R.string.left_right_assertion_error }
@@ -494,6 +505,8 @@ class MainActivity : ComponentActivity() {
         // Gyro stuff
         if (inputType == SensorInput.RIGHT_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             for (i in 0 until rightRep)
                 extendRight(test_text.text, test_text.layout)
 
@@ -501,6 +514,8 @@ class MainActivity : ComponentActivity() {
         }
         else if (inputType == SensorInput.LEFT_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             for (i in 0 until leftRep)
                 extendLeft(test_text.text, test_text.layout)
 
@@ -509,23 +524,31 @@ class MainActivity : ComponentActivity() {
 
         if (inputType == SensorInput.DOWN_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendDown(test_text.text, test_text.layout)
             return
         }
         else if (inputType == SensorInput.UP_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendUp(test_text.text, test_text.layout)
             return
         }
 
         if (inputType == SensorInput.CLOCK_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendToRightEdge(test_text.text, test_text.layout)
             return
         }
 
         else if (inputType == SensorInput.COUNTERCLOCK_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendToLeftEdge(test_text.text, test_text.layout)
             return
         }
@@ -577,6 +600,8 @@ class MainActivity : ComponentActivity() {
 
             // Start timer
             c_timer.setTimer(2000, SensorInput.UP_MOVE)
+
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
 
             return
         }
