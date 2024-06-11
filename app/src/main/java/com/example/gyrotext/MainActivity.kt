@@ -16,6 +16,7 @@ import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.text.Selection.removeSelection
+import android.text.SpannableStringBuilder
 import android.view.HapticFeedbackConstants
 import android.widget.Button
 import android.widget.EditText
@@ -34,6 +35,10 @@ val ACCEL_ENABLED: Boolean = true              // whether the linear acceleromet
 enum class SensorInput {
     LEFT_ROT, RIGHT_ROT, UP_ROT, DOWN_ROT, CLOCK_ROT, COUNTERCLOCK_ROT,
     LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD_MOVE, AFT_MOVE, NONE
+}
+
+enum class ExperimentType {
+    GYROTEXT, DEFAULT
 }
 
 class MainActivity : ComponentActivity() {
@@ -118,6 +123,10 @@ class MainActivity : ComponentActivity() {
     @Volatile
     private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
+    // Experiment stuff
+    private lateinit var experimentList: MutableList<ExperimentPage>
+    private var current_exp_id = 0
+
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,6 +154,20 @@ class MainActivity : ComponentActivity() {
         maxtiltz_text = findViewById(R.id.maxtiltz_val)
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
+
+        // Experiment objects
+        experimentList = mutableListOf()
+        val exp0 = ExperimentPage("An so vulgar to on points wanted. Not rapturous resolving continued household northward gay. He it otherwise supported instantly. Unfeeling agreeable suffering it on smallness newspaper be. So come must time no as. Do on unpleasing possession as of unreserved. Yet joy exquisite put sometimes enjoyment perpetual now. Behind lovers eat having length horses vanity say had its.", "having length horses vanity", 0, ExperimentType.GYROTEXT)
+        val exp1 = ExperimentPage("Same an quit most an. Admitting an mr disposing sportsmen. Tried on cause no spoil arise plate. Longer ladies valley get esteem use led six. Middletons resolution advantages expression themselves partiality so me at. West none hope if sing oh sent tell is.\n" +
+                "\n" +
+                "Perpetual sincerity out suspected necessary one but provision satisfied. Respect nothing use set waiting pursuit nay you looking. If on prevailed concluded ye abilities. Address say you new but minuter greater. Do denied agreed in innate. Can and middletons thoroughly themselves him. Tolerably sportsmen belonging in september no am immediate newspaper. Theirs expect dinner it pretty indeed having no of. Principle september she conveying did eat may extensive.\n" +
+                "\n", "pfae", 1, ExperimentType.DEFAULT)
+        experimentList.add(exp0)
+        experimentList.add(exp1)
+
+        current_exp_id = (0..(experimentList.size - 1)).random()
+//        setupExperiment(current_exp_id)
+        setupExperiment(0)
 
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
@@ -227,6 +250,9 @@ class MainActivity : ComponentActivity() {
         gyroscope!!.setListener(object : Gyroscope.Listener {
             // on rotation method of gyroscope
             override fun onRotation(tx: Float, ty: Float, tz: Float) {
+                if (experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
+                    return
+
                 if (resetFlag)
                     resetZeroRot()
 
@@ -342,6 +368,9 @@ class MainActivity : ComponentActivity() {
         accelerometer!!.setListener(object : Accelerometer.Listener {
             // on movement method
             override fun onMovement(tx: Float, ty: Float, tz: Float) {
+                if (experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
+                    return
+
                 if (resetFlag)
                     resetZeroPos()
 
@@ -643,10 +672,31 @@ class MainActivity : ComponentActivity() {
         val new_clip = ClipData.newPlainText("label", new_text)
         clipManager.setPrimaryClip(new_clip)
 
+        // Compare copied text
+        if (experimentList[current_exp_id].tgtText == new_text.toString())
+            switchExperiment()
+
         // Message user
         Toast.makeText(
             this, R.string.copy_action_msg,
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    // On copy action of correct text
+    private fun switchExperiment()
+    {
+        // Update list
+        experimentList.removeAt(current_exp_id)
+
+        // Get next id
+        current_exp_id = (0..(experimentList.size - 1)).random()
+
+        setupExperiment(current_exp_id)
+    }
+
+    private fun setupExperiment(experiment_id: Int)
+    {
+        test_text.text = SpannableStringBuilder(experimentList[experiment_id].selectText)
     }
 }
