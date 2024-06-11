@@ -1,12 +1,12 @@
 package com.example.gyrotext
 
-import android.R.attr.delay
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.Environment
+import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.text.Selection.extendDown
@@ -17,7 +17,7 @@ import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.text.Selection.removeSelection
 import android.text.SpannableStringBuilder
-import android.view.HapticFeedbackConstants
+import android.text.style.ForegroundColorSpan
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -56,10 +56,10 @@ class MainActivity : ComponentActivity() {
     // Development buttons
     // TODO: Remove or hide in release version
     lateinit var devLeftBut: Button
-    lateinit var devRightBut: Button
     lateinit var devUpBut: Button
     lateinit var devDownBut: Button
     lateinit var testMetricsBut: Button
+    lateinit var copyBut: Button
 
     // Development metrics values
     private var g_max_x = 0f
@@ -135,10 +135,10 @@ class MainActivity : ComponentActivity() {
         // Initialize all
         zeroBut = findViewById(R.id.zero_but)
         devLeftBut = findViewById(R.id.dev_left_but)
-        devRightBut = findViewById(R.id.dev_right_but)
         devUpBut = findViewById(R.id.dev_up_but)
         devDownBut = findViewById(R.id.dev_down_but)
-        testMetricsBut = findViewById(R.id.testing_but)
+        testMetricsBut = findViewById(R.id.test_but)
+        copyBut = findViewById(R.id.copy_but)
         g_maxx_text = findViewById(R.id.x_axis_val)
         g_maxy_text = findViewById(R.id.y_axis_val)
         g_maxz_text = findViewById(R.id.z_axis_val)
@@ -161,22 +161,30 @@ class MainActivity : ComponentActivity() {
         val exp1 = ExperimentPage("Same an quit most an. Admitting an mr disposing sportsmen. Tried on cause no spoil arise plate. Longer ladies valley get esteem use led six. Middletons resolution advantages expression themselves partiality so me at. West none hope if sing oh sent tell is.\n" +
                 "\n" +
                 "Perpetual sincerity out suspected necessary one but provision satisfied. Respect nothing use set waiting pursuit nay you looking. If on prevailed concluded ye abilities. Address say you new but minuter greater. Do denied agreed in innate. Can and middletons thoroughly themselves him. Tolerably sportsmen belonging in september no am immediate newspaper. Theirs expect dinner it pretty indeed having no of. Principle september she conveying did eat may extensive.\n" +
-                "\n", "pfae", 1, ExperimentType.DEFAULT)
+                "\n", "Respect nothing use set waiting pursuit nay you looking.", 1, ExperimentType.DEFAULT)
         experimentList.add(exp0)
         experimentList.add(exp1)
 
-        current_exp_id = (0..(experimentList.size - 1)).random()
+//        current_exp_id = (0..(experimentList.size - 1)).random()
 //        setupExperiment(current_exp_id)
-        setupExperiment(0)
+        current_exp_id = 1
+        setupExperiment(current_exp_id)
 
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
         devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
-        devRightBut.setOnClickListener { updateSelection(SensorInput.RIGHT_ROT) }
         devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
         devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
         testMetricsBut.setOnClickListener {
             saveMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, maxFwd, maxBwd)
+        }
+        copyBut.setOnClickListener {
+            // Set text to clipboard
+            val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
+            setClipboardClip(selected_text)
+
+            // Remove selection after copy
+            removeSelection(test_text.text)
         }
 
         // Initialize and set up gyroscope
@@ -698,5 +706,8 @@ class MainActivity : ComponentActivity() {
     private fun setupExperiment(experiment_id: Int)
     {
         test_text.text = SpannableStringBuilder(experimentList[experiment_id].selectText)
+        val st = experimentList[experiment_id].selectText.indexOf(experimentList[experiment_id].tgtText)
+        val end = st + experimentList[experiment_id].tgtText.length
+        test_text.text.setSpan(ForegroundColorSpan(Color.MAGENTA), st, end, 0)
     }
 }
