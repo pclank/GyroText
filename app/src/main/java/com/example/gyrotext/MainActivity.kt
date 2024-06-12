@@ -694,6 +694,16 @@ class MainActivity : ComponentActivity() {
     // On copy action of correct text
     private fun switchExperiment()
     {
+        // TODO: End experiment!
+        if (experimentList.size == 1)
+        {
+            Toast.makeText(
+                this, R.string.exp_end_temp,
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
         // Update list
         experimentList.removeAt(current_exp_id)
 
