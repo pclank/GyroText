@@ -18,6 +18,7 @@ import android.text.Selection.extendUp
 import android.text.Selection.removeSelection
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -47,7 +48,6 @@ class MainActivity : ComponentActivity() {
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
     private lateinit var clipManager: ClipboardManager
-    lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
 
     // Vibrator
@@ -55,11 +55,10 @@ class MainActivity : ComponentActivity() {
 
     // Development buttons
     // TODO: Remove or hide in release version
-    lateinit var devLeftBut: Button
-    lateinit var devUpBut: Button
-    lateinit var devDownBut: Button
     lateinit var testMetricsBut: Button
     lateinit var copyBut: Button
+    lateinit var idBut: Button
+    lateinit var startPracticeBut: Button
 
     // Development metrics values
     private var g_max_x = 0f
@@ -123,10 +122,15 @@ class MainActivity : ComponentActivity() {
     @Volatile
     private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
+    // Input field
+    private lateinit var idInput: EditText
+
     // Experiment stuff
     private lateinit var experimentList: MutableList<ExperimentPage>
     private var current_exp_id = 0
     private lateinit var current_exp_metrics: ExperimentMetrics
+    private var userID: Int = -1                            // It's obvious
+    private var practiceFlag: Boolean = true
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,10 +138,6 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.main)
 
         // Initialize all
-        zeroBut = findViewById(R.id.zero_but)
-        devLeftBut = findViewById(R.id.dev_left_but)
-        devUpBut = findViewById(R.id.dev_up_but)
-        devDownBut = findViewById(R.id.dev_down_but)
         testMetricsBut = findViewById(R.id.test_but)
         copyBut = findViewById(R.id.copy_but)
         g_maxx_text = findViewById(R.id.x_axis_val)
@@ -155,11 +155,14 @@ class MainActivity : ComponentActivity() {
         maxtiltz_text = findViewById(R.id.maxtiltz_val)
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
-
+        idInput = findViewById(R.id.user_id_text)
+        idBut = findViewById(R.id.id_input_but)
+        startPracticeBut = findViewById(R.id.start_but)
 
         // Experiment objects
         experimentList = mutableListOf()
-        val exp0 = ExperimentPage("An so vulgar to on points wanted. Not rapturous resolving continued household northward gay. He it otherwise supported instantly. Unfeeling agreeable suffering it on smallness newspaper be. So come must time no as. Do on unpleasing possession as of unreserved. Yet joy exquisite put sometimes enjoyment perpetual now. Behind lovers eat having length horses vanity say had its.", "having length horses vanity", 0, ExperimentType.GYROTEXT)
+//        val exp0 = ExperimentPage("An so vulgar to on points wanted. Not rapturous resolving continued household northward gay. He it otherwise supported instantly. Unfeeling agreeable suffering it on smallness newspaper be. So come must time no as. Do on unpleasing possession as of unreserved. Yet joy exquisite put sometimes enjoyment perpetual now. Behind lovers eat having length horses vanity say had its.", "having length horses vanity", 0, ExperimentType.GYROTEXT)
+        val exp0 = ExperimentPage("Wrote water woman of heart it total other. By in entirely securing suitable graceful at families improved.\n Zealously few furniture repulsive was agreeable consisted difficult. Collected breakfast estimable questions in to favourite it. Known he place worth words it as to. Spoke now noise off smart her ready. Built purse maids cease her ham new seven among and. Pulled coming wooded tended it answer remain me be. So landlord by we unlocked sensible it. Fat cannot use denied excuse son law. Wisdom happen suffer common the appear ham beauty her had. Or belonging zealously existence as by resources.", "Known he place worth words it as to.", 0, ExperimentType.GYROTEXT)
         val exp1 = ExperimentPage("Same an quit most an. Admitting an mr disposing sportsmen. Tried on cause no spoil arise plate. Longer ladies valley get esteem use led six. Middletons resolution advantages expression themselves partiality so me at. West none hope if sing oh sent tell is.\n" +
                 "\n" +
                 "Perpetual sincerity out suspected necessary one but provision satisfied. Respect nothing use set waiting pursuit nay you looking. If on prevailed concluded ye abilities. Address say you new but minuter greater. Do denied agreed in innate. Can and middletons thoroughly themselves him. Tolerably sportsmen belonging in september no am immediate newspaper. Theirs expect dinner it pretty indeed having no of. Principle september she conveying did eat may extensive.\n" +
@@ -167,17 +170,10 @@ class MainActivity : ComponentActivity() {
         experimentList.add(exp0)
         experimentList.add(exp1)
 
-//        current_exp_id = (0..(experimentList.size - 1)).random()
+        current_exp_id = 0
 //        setupExperiment(current_exp_id)
-        current_exp_id = 1
-        setupExperiment(current_exp_id)
-        current_exp_metrics = ExperimentMetrics(0, experimentList[current_exp_id].id, System.currentTimeMillis())
 
         // Button listeners
-        zeroBut.setOnClickListener { setZeroButton() }
-        devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
-        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
-        devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
         testMetricsBut.setOnClickListener {
             saveMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, maxFwd, maxBwd)
         }
@@ -189,6 +185,18 @@ class MainActivity : ComponentActivity() {
             // Remove selection after copy
             removeSelection(test_text.text)
         }
+
+        idBut.setOnClickListener {
+            startPractice()
+        }
+
+        startPracticeBut.setOnClickListener {
+            startExperiment()
+        }
+
+        // Starting screen setup
+        test_text.visibility = View.GONE
+        startPracticeBut.visibility = View.GONE
 
         // Initialize and set up gyroscope
         gyroscope = Gyroscope(this)
@@ -261,7 +269,7 @@ class MainActivity : ComponentActivity() {
         gyroscope!!.setListener(object : Gyroscope.Listener {
             // on rotation method of gyroscope
             override fun onRotation(tx: Float, ty: Float, tz: Float) {
-                if (experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
+                if (!practiceFlag && experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
                     return
 
                 if (resetFlag)
@@ -379,7 +387,7 @@ class MainActivity : ComponentActivity() {
         accelerometer!!.setListener(object : Accelerometer.Listener {
             // on movement method
             override fun onMovement(tx: Float, ty: Float, tz: Float) {
-                if (experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
+                if (!practiceFlag && experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
                     return
 
                 if (resetFlag)
@@ -550,7 +558,8 @@ class MainActivity : ComponentActivity() {
             for (i in 0 until rightRep)
                 extendRight(test_text.text, test_text.layout)
 
-            current_exp_metrics.RIGHT_ROT++
+            if (!practiceFlag)
+                current_exp_metrics.RIGHT_ROT++
             return
         }
         else if (inputType == SensorInput.LEFT_ROT)
@@ -560,8 +569,8 @@ class MainActivity : ComponentActivity() {
             for (i in 0 until leftRep)
                 extendLeft(test_text.text, test_text.layout)
 
-
-            current_exp_metrics.LEFT_ROT++
+            if (!practiceFlag)
+                current_exp_metrics.LEFT_ROT++
             return
         }
 
@@ -571,7 +580,8 @@ class MainActivity : ComponentActivity() {
 
             extendDown(test_text.text, test_text.layout)
 
-            current_exp_metrics.DOWN_ROT++
+            if (!practiceFlag)
+                current_exp_metrics.DOWN_ROT++
             return
         }
         else if (inputType == SensorInput.UP_ROT)
@@ -580,7 +590,8 @@ class MainActivity : ComponentActivity() {
 
             extendUp(test_text.text, test_text.layout)
 
-            current_exp_metrics.UP_ROT++
+            if (!practiceFlag)
+                current_exp_metrics.UP_ROT++
             return
         }
 
@@ -590,7 +601,8 @@ class MainActivity : ComponentActivity() {
 
             extendToRightEdge(test_text.text, test_text.layout)
 
-            current_exp_metrics.CLOCK_ROT++
+            if (!practiceFlag)
+                current_exp_metrics.CLOCK_ROT++
             return
         }
 
@@ -600,7 +612,8 @@ class MainActivity : ComponentActivity() {
 
             extendToLeftEdge(test_text.text, test_text.layout)
 
-            current_exp_metrics.COUNTERCLOCK_ROT++
+            if (!practiceFlag)
+                current_exp_metrics.COUNTERCLOCK_ROT++
             return
         }
 
@@ -690,13 +703,14 @@ class MainActivity : ComponentActivity() {
 
     private fun setClipboardClip(new_text: CharSequence)
     {
-        current_exp_metrics.copyAttempts++
+        if (!practiceFlag)
+            current_exp_metrics.copyAttempts++
         // Copy to clipboard and set as primary clip
         val new_clip = ClipData.newPlainText("label", new_text)
         clipManager.setPrimaryClip(new_clip)
 
         // Compare copied text
-        if (experimentList[current_exp_id].tgtText == new_text.toString())
+        if (!practiceFlag && experimentList[current_exp_id].tgtText == new_text.toString())
             switchExperiment()
 
         // Message user
@@ -733,9 +747,33 @@ class MainActivity : ComponentActivity() {
 
     private fun setupExperiment(experiment_id: Int)
     {
+        current_exp_metrics = ExperimentMetrics(userID, experimentList[current_exp_id].id, System.currentTimeMillis())
+
         test_text.text = SpannableStringBuilder(experimentList[experiment_id].selectText)
         val st = experimentList[experiment_id].selectText.indexOf(experimentList[experiment_id].tgtText)
         val end = st + experimentList[experiment_id].tgtText.length
         test_text.text.setSpan(ForegroundColorSpan(Color.MAGENTA), st, end, 0)
+    }
+
+    private fun startPractice()
+    {
+        // Assign ID
+        userID = idInput.text.toString().toInt()
+
+        // Update screen
+        test_text.visibility = View.VISIBLE
+        idBut.visibility = View.GONE
+        idInput.visibility = View.GONE
+        startPracticeBut.visibility = View.VISIBLE
+    }
+
+    private fun startExperiment()
+    {
+        // Update screen
+        startPracticeBut.visibility = View.GONE
+
+        practiceFlag = false
+        current_exp_id = (0..(experimentList.size - 1)).random()
+        setupExperiment(current_exp_id)
     }
 }
