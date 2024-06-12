@@ -126,6 +126,7 @@ class MainActivity : ComponentActivity() {
     // Experiment stuff
     private lateinit var experimentList: MutableList<ExperimentPage>
     private var current_exp_id = 0
+    private lateinit var current_exp_metrics: ExperimentMetrics
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,6 +156,7 @@ class MainActivity : ComponentActivity() {
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
 
+
         // Experiment objects
         experimentList = mutableListOf()
         val exp0 = ExperimentPage("An so vulgar to on points wanted. Not rapturous resolving continued household northward gay. He it otherwise supported instantly. Unfeeling agreeable suffering it on smallness newspaper be. So come must time no as. Do on unpleasing possession as of unreserved. Yet joy exquisite put sometimes enjoyment perpetual now. Behind lovers eat having length horses vanity say had its.", "having length horses vanity", 0, ExperimentType.GYROTEXT)
@@ -169,6 +171,7 @@ class MainActivity : ComponentActivity() {
 //        setupExperiment(current_exp_id)
         current_exp_id = 1
         setupExperiment(current_exp_id)
+        current_exp_metrics = ExperimentMetrics(0, experimentList[current_exp_id].id, System.currentTimeMillis())
 
         // Button listeners
         zeroBut.setOnClickListener { setZeroButton() }
@@ -547,6 +550,7 @@ class MainActivity : ComponentActivity() {
             for (i in 0 until rightRep)
                 extendRight(test_text.text, test_text.layout)
 
+            current_exp_metrics.RIGHT_ROT++
             return
         }
         else if (inputType == SensorInput.LEFT_ROT)
@@ -556,6 +560,8 @@ class MainActivity : ComponentActivity() {
             for (i in 0 until leftRep)
                 extendLeft(test_text.text, test_text.layout)
 
+
+            current_exp_metrics.LEFT_ROT++
             return
         }
 
@@ -564,6 +570,8 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
 
             extendDown(test_text.text, test_text.layout)
+
+            current_exp_metrics.DOWN_ROT++
             return
         }
         else if (inputType == SensorInput.UP_ROT)
@@ -571,6 +579,8 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
 
             extendUp(test_text.text, test_text.layout)
+
+            current_exp_metrics.UP_ROT++
             return
         }
 
@@ -579,6 +589,8 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
 
             extendToRightEdge(test_text.text, test_text.layout)
+
+            current_exp_metrics.CLOCK_ROT++
             return
         }
 
@@ -587,6 +599,8 @@ class MainActivity : ComponentActivity() {
             vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
 
             extendToLeftEdge(test_text.text, test_text.layout)
+
+            current_exp_metrics.COUNTERCLOCK_ROT++
             return
         }
 
@@ -676,6 +690,7 @@ class MainActivity : ComponentActivity() {
 
     private fun setClipboardClip(new_text: CharSequence)
     {
+        current_exp_metrics.copyAttempts++
         // Copy to clipboard and set as primary clip
         val new_clip = ClipData.newPlainText("label", new_text)
         clipManager.setPrimaryClip(new_clip)
@@ -694,6 +709,9 @@ class MainActivity : ComponentActivity() {
     // On copy action of correct text
     private fun switchExperiment()
     {
+        val externalStorageDir = getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath
+        current_exp_metrics.saveToJSON(this, "user"+ current_exp_metrics.userID + "_expid" + current_exp_metrics.expID, externalStorageDir)
+
         // TODO: End experiment!
         if (experimentList.size == 1)
         {
