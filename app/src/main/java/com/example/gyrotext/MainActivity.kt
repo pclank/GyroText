@@ -20,6 +20,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -92,7 +93,8 @@ class MainActivity : ComponentActivity() {
     lateinit var test_text: EditText
 
     // Threshold "macros" for Gyro
-    private val gxThres = 0.8f
+//    private val gxThres = 0.8f
+    private val gxThres = 1.0f
     private val gyThres = 0.8f
     private val gzThres = 0.9f
 
@@ -103,6 +105,10 @@ class MainActivity : ComponentActivity() {
     private val axThres = 3.2f
     private val ayThres = 3.2f
     private val azThres = 3.2f
+
+    // Cursor position
+    private lateinit var cursor: ImageView
+    private lateinit var cursor_zero: float3
 
     // Reps for left-right extension functions (kotlin hates unsigned ints???)
     private val leftRep: Int = 1
@@ -147,6 +153,9 @@ class MainActivity : ComponentActivity() {
         maxtiltz_text = findViewById(R.id.maxtiltz_val)
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
+        cursor = findViewById(R.id.cursor)
+
+        cursor_zero = float3(cursor.translationX, cursor.translationY, cursor.translationZ)
 
         // Experiment objects
         experimentList = mutableListOf()
@@ -256,6 +265,10 @@ class MainActivity : ComponentActivity() {
                 zeroRot.x += tx
                 zeroRot.y += ty
                 zeroRot.z += tz
+
+                cursor.translationX = zeroRot.y * 10
+                cursor.translationY = zeroRot.x * 10
+                cursor.translationZ = zeroRot.z * 10
 
                 //Maximum tilt values
                 maxtx = max(maxtx, abs(zeroRot.x))
@@ -683,6 +696,10 @@ class MainActivity : ComponentActivity() {
     // On copy action of correct text
     private fun switchExperiment()
     {
+        cursor.translationX = cursor_zero.x
+        cursor.translationY = cursor_zero.y
+        cursor.translationZ = cursor_zero.z
+
         // Update list
         experimentList.removeAt(current_exp_id)
 
