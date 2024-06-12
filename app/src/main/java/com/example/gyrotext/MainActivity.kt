@@ -55,9 +55,6 @@ class MainActivity : ComponentActivity() {
 
     // Development buttons
     // TODO: Remove or hide in release version
-    lateinit var devLeftBut: Button
-    lateinit var devUpBut: Button
-    lateinit var devDownBut: Button
     lateinit var testMetricsBut: Button
     lateinit var copyBut: Button
 
@@ -133,10 +130,6 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.main)
 
         // Initialize all
-        zeroBut = findViewById(R.id.zero_but)
-        devLeftBut = findViewById(R.id.dev_left_but)
-        devUpBut = findViewById(R.id.dev_up_but)
-        devDownBut = findViewById(R.id.dev_down_but)
         testMetricsBut = findViewById(R.id.test_but)
         copyBut = findViewById(R.id.copy_but)
         g_maxx_text = findViewById(R.id.x_axis_val)
@@ -171,10 +164,6 @@ class MainActivity : ComponentActivity() {
         setupExperiment(current_exp_id)
 
         // Button listeners
-        zeroBut.setOnClickListener { setZeroButton() }
-        devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
-        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
-        devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
         testMetricsBut.setOnClickListener {
             saveMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, maxFwd, maxBwd)
         }
