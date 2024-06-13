@@ -2,4 +2,7 @@
     <string name="app_name">GyroText</string>
     <string name="copy_action_msg">Text copied!</string>
     <string name="left_right_assertion_error">Left-right rep assertion failed. Shoot the devs!</string>
+    <string name="exp_end_temp">The experiment is over! So sad! \ud83d\ude25</string>
+    <string name="default_method">Touch-based method</string>
+    <string name="tilt_method">Tilt-based method</string>
 </resources>

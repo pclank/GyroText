@@ -1,12 +1,15 @@
 package com.example.gyrotext
 
-import android.R.attr.delay
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.os.Environment
-action_deconfliction_to_master
+import android.os.Handler
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.text.InputType
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
@@ -14,11 +17,15 @@ import android.text.Selection.extendToLeftEdge
 import android.text.Selection.extendToRightEdge
 import android.text.Selection.extendUp
 import android.text.Selection.removeSelection
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -32,22 +39,27 @@ enum class SensorInput {
     LEFT_MOVE, RIGHT_MOVE, UP_MOVE, DOWN_MOVE, FWD_MOVE, AFT_MOVE, NONE
 }
 
+enum class ExperimentType {
+    GYROTEXT, DEFAULT
+}
+
 class MainActivity : ComponentActivity() {
     // Many variables
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
     private lateinit var clipManager: ClipboardManager
-    lateinit var zeroBut: Button
     private var resetFlag: Boolean = false
+
+    // Vibrator
+    private lateinit var vibrator: Vibrator
 
     // Development buttons
     // TODO: Remove or hide in release version
-    lateinit var devLeftBut: Button
-    lateinit var devRightBut: Button
-    lateinit var devUpBut: Button
-    lateinit var devDownBut: Button
     lateinit var testMetricsBut: Button
+    lateinit var copyBut: Button
+    lateinit var idBut: Button
+    lateinit var startPracticeBut: Button
 
     // Development metrics values
     private var g_max_x = 0f
@@ -111,17 +123,30 @@ class MainActivity : ComponentActivity() {
     @Volatile
     private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
+    // Input field
+    private lateinit var idInput: EditText
+
+    // Experiment stuff
+    private lateinit var experimentList: MutableList<ExperimentPage>
+    private var current_exp_id = 0
+    private lateinit var current_exp_metrics: ExperimentMetrics
+    private var userID: Int = -1                            // It's obvious
+    private var practiceFlag: Boolean = true
+    private lateinit var methodText: TextView
+
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
 
+//        Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
+//            // Without System.exit() this will not work.
+//            System.exit(2)
+//        }
+
         // Initialize all
-        zeroBut = findViewById(R.id.zero_but)
-        devLeftBut = findViewById(R.id.dev_left_but)
-        devRightBut = findViewById(R.id.dev_right_but)
-        devUpBut = findViewById(R.id.dev_up_but)
-        devDownBut = findViewById(R.id.dev_down_but)
-        testMetricsBut = findViewById(R.id.testing_but)
+        testMetricsBut = findViewById(R.id.test_but)
+        copyBut = findViewById(R.id.copy_but)
         g_maxx_text = findViewById(R.id.x_axis_val)
         g_maxy_text = findViewById(R.id.y_axis_val)
         g_maxz_text = findViewById(R.id.z_axis_val)
@@ -137,16 +162,72 @@ class MainActivity : ComponentActivity() {
         maxtiltz_text = findViewById(R.id.maxtiltz_val)
         a_mFwd_text = findViewById(R.id.a_maxfwd_val)
         a_mBwd_text = findViewById(R.id.a_maxbwd_val)
+        idInput = findViewById(R.id.user_id_text)
+        idBut = findViewById(R.id.id_input_but)
+        startPracticeBut = findViewById(R.id.start_but)
+        methodText = findViewById(R.id.method_text)
+
+        // Experiment objects
+        experimentList = mutableListOf()
+        val exp0 = ExperimentPage("Wrote water woman of heart it total other. By in entirely securing suitable graceful at families improved. Zealously few furniture repulsive was agreeable consisted difficult. Collected breakfast noise off estimable questions in to favourite it. Known he place worth words it as to. Spoke now smart her ready. Built purse maids cease her ham new seven among and. Pulled coming wooded tended it answer remain me be. So landlord by we unlocked sensible it. Fat cannot use denied excuse son law. Wisdom happen suffer common the appear ham beauty her had. Or belonging zealously existence as by resources.", "Known he place worth words it as to.", 0, ExperimentType.GYROTEXT)
+        val exp1 = ExperimentPage("Sigh view am high neat half to what. Sent late held than set why wife our. If an blessing building steepest. Agreement distrusts mrs six affection satisfied. Day blushes visitor end company discretion prevent chapter. Consider declared out expenses her concerns. No at indulgence conviction particular unsatiable all ignorant no supplied boisterous old. Direct enough off others say eldest may get. You vexed shy mirth now noise. Possible Exeter settling marriage recurred. Talked him people valley add use her depend letter. Allowance too applauded now way something recommend.", "Direct enough off others say eldest may get.", 1, ExperimentType.DEFAULT)
+        val exp2 = ExperimentPage("Difficulty on insensible reasonable in. From as went he they. Preference themselves me as thoroughly partiality considered on in estimating. Middletons acceptance discovered projecting so is so or. In or attachment L88423PX(Aedean) inquietude remarkably comparison at an. Is surrounded prosperous stimulated am me discretion expression. But truth being state can she china widow. Occasional preference fat remarkably now projecting uncommonly dissimilar. Sentiments projection particular companions interested do at my delightful. Listening newspaper in advantage frankness to concluded unwilling.", "L88423PX", 2, ExperimentType.GYROTEXT)
+        val exp3 = ExperimentPage("Throwing consider dwelling bachelor joy her proposal laughter. Raptures returned disposed one entirely her men ham. By to admire vanity county an mutual as roused. Of an thrown am warmly merely result depart supply. Required honoured X-89758FR(Tranvavia) trifling eat pleasure man relation. Assurance yet bed was improving furniture man. Distrusts delighted she listening mrs extensive admitting far. Written enquire painful ye to offices forming it. Then so does over sent dull on. Likewise offended humoured mrs fat trifling answered. On ye position greatest so desirous.", "X-89758FR", 3, ExperimentType.DEFAULT)
+        val exp4 = ExperimentPage("Savings her pleased are several started females met. Short her not among being any. Thing of judge fruit charm views do. Miles mr an forty along as he. She education get middleton day agreement performed preserved unwilling. Do however as pleased offence outward beloved by present. By outward neither he so covered amiable greater. Juvenile proposal betrayed he an informed weddings followed. Precaution day see imprudence sympathize principles. At full leaf give quit to in they up. Is branched in my up strictly remember. Songs but chief has ham widow downs.", "Savings her pleased are several started females met.", 4, ExperimentType.GYROTEXT)
+        val exp5 = ExperimentPage("Unfeeling so rapturous discovery or he reasonably so. Middletons exquisite impression by terminated. Old pleasure required removing elegance him had. Down she bore sing saw calm high. Of an or game gate west face shed. no great but music too old found arose. Seen you eyes son show. Far two unaffected one alteration apartments celebrated but middletons interested. Described deficient applauded consisted my me do. Passed edward two talent effect seemed engage six. On ye great do child sorry lived. Proceed cottage far letters ashamed get clothes day. Stairs regret at if matter to.", "Unfeeling so rapturous discovery or he reasonably so.", 5, ExperimentType.DEFAULT)
+        val exp6 = ExperimentPage("Expenses as material breeding insisted building to in. Continual so distrusts pronounce by unwilling listening. Thing do taste on we manor. Him had wound use found hoped. Of distrusts immediate enjoyment curiosity do. Marianne numerous saw thoughts the humored. Ye in mr evil. Spoke as as other again ye. Hard on to roof he drew so incommode sell side. Longer waited mr of nature seemed. Improving knowledge objection me ye is prevailed principle in. Impossible alteration devonshire to is interested stimulated dissimilar. To matter esteem polite do if.", "Hard on to roof he drew so incommode sell side.", 6, ExperimentType.GYROTEXT)
+        val exp7 = ExperimentPage("Its sometimes her behaviour are contented. Do listening am eagerness oh objection collected. Together gay feelings continue juvenile had off one. Unknown may service subject her letters one bed. Child years noise ye in forty. Loud in this in both hold. My travelling entrance me is disposal bachelor remember relation. New the her nor case that lady paid read. Invitation friendship eat everything the out two. Shy you who scarcely debating resolved. Always polite on is warmth spirit it to hearts. Downs those still witty an balls so chief so. Moment an little remain no up lively no.", "New the her nor case that lady paid read.", 7, ExperimentType.DEFAULT)
+        val exp8 = ExperimentPage("Is at purse tried jokes china ready decay an. Small its shy way had woody downs power. To denoting admitted speaking learning my exercise so in. Procured shutters mr it feelings. To or three offer house begin taken am at. As dissuade cheerful overcame so of friendly he indulged unpacked. Alteration connection to so as collecting me. Difficult in delivered extensive at direction allowance. Alteration put use diminution can considered sentiments interested discretion. An seeing feebly stairs am branch income me unable. Suppose end get boy warrant general natural.", "cheerful overcame so of friendly he indulged unpacked. Alteration con", 8, ExperimentType.GYROTEXT)
+        val exp9 = ExperimentPage("Ask especially collecting terminated may son expression. Extremely eagerness principle estimable own was man. Men received far his dashwood subjects new. My sufficient surrounded an companions dispatched in on. Connection too unaffected expression led son possession. New smiling friends and outweigh her another. Leaf she does none love high yet. Snug love will up bore as be. Pursuit man son musical general pointed. It surprise informed mr advanced do. Yet bed any for travelling assistance indulgence unpleasing. Not thoughts all exercise blessing. Indulgence way everything.", "unaffected expression led son possession. New smiling friends and out", 9, ExperimentType.DEFAULT)
+
+        experimentList.add(exp0)
+        experimentList.add(exp1)
+        experimentList.add(exp2)
+        experimentList.add(exp3)
+        experimentList.add(exp4)
+        experimentList.add(exp5)
+        experimentList.add(exp6)
+        experimentList.add(exp7)
+        experimentList.add(exp8)
+        experimentList.add(exp9)
+
+        current_exp_id = 0
+//        setupExperiment(current_exp_id)
 
         // Button listeners
-        zeroBut.setOnClickListener { setZeroButton() }
-        devLeftBut.setOnClickListener { updateSelection(SensorInput.LEFT_ROT) }
-        devRightBut.setOnClickListener { updateSelection(SensorInput.RIGHT_ROT) }
-        devUpBut.setOnClickListener { updateSelection(SensorInput.UP_ROT) }
-        devDownBut.setOnClickListener { updateSelection(SensorInput.DOWN_ROT) }
         testMetricsBut.setOnClickListener {
             saveMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, maxFwd, maxBwd)
         }
+        copyBut.setOnClickListener {
+            // Flip selection indices if needed
+            var sel_start = test_text.selectionStart
+            var sel_end = test_text.selectionEnd
+            if (test_text.selectionStart > test_text.selectionEnd)
+            {
+                sel_start = test_text.selectionEnd
+                sel_end = test_text.selectionStart
+            }
+
+            // Set text to clipboard
+            val selected_text: CharSequence = test_text.text.subSequence(sel_start, sel_end)
+            setClipboardClip(selected_text)
+
+            // Remove selection after copy
+            removeSelection(test_text.text)
+        }
+
+        idBut.setOnClickListener {
+            startPractice()
+        }
+
+        startPracticeBut.setOnClickListener {
+            startExperiment()
+        }
+
+        // Starting screen setup
+        methodText.visibility = View.GONE
+        test_text.visibility = View.GONE
+        startPracticeBut.visibility = View.GONE
 
         // Initialize and set up gyroscope
         gyroscope = Gyroscope(this)
@@ -158,6 +239,8 @@ class MainActivity : ComponentActivity() {
 
         // Initialize timer
         c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
+
+        vibrator = getSystemService(Vibrator::class.java)
 
         // Initialize clipboard manager
         clipManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
@@ -217,6 +300,9 @@ class MainActivity : ComponentActivity() {
         gyroscope!!.setListener(object : Gyroscope.Listener {
             // on rotation method of gyroscope
             override fun onRotation(tx: Float, ty: Float, tz: Float) {
+                if (!practiceFlag && experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
+                    return
+
                 if (resetFlag)
                     resetZeroRot()
 
@@ -332,6 +418,9 @@ class MainActivity : ComponentActivity() {
         accelerometer!!.setListener(object : Accelerometer.Listener {
             // on movement method
             override fun onMovement(tx: Float, ty: Float, tz: Float) {
+                if (!practiceFlag && experimentList[current_exp_id].expType == ExperimentType.DEFAULT)
+                    return
+
                 if (resetFlag)
                     resetZeroPos()
 
@@ -487,46 +576,78 @@ class MainActivity : ComponentActivity() {
         // TODO: Add position to layout!
     }
     
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun updateSelection(inputType: SensorInput)
     {
         require(rightRep > 0 && leftRep > 0) { R.string.left_right_assertion_error }
 
+        if (inputType == SensorInput.NONE)
+            return
+
         // Gyro stuff
         if (inputType == SensorInput.RIGHT_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             for (i in 0 until rightRep)
                 extendRight(test_text.text, test_text.layout)
 
+            if (!practiceFlag)
+                current_exp_metrics.RIGHT_ROT++
             return
         }
         else if (inputType == SensorInput.LEFT_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             for (i in 0 until leftRep)
                 extendLeft(test_text.text, test_text.layout)
 
+            if (!practiceFlag)
+                current_exp_metrics.LEFT_ROT++
             return
         }
 
         if (inputType == SensorInput.DOWN_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendDown(test_text.text, test_text.layout)
+
+            if (!practiceFlag)
+                current_exp_metrics.DOWN_ROT++
             return
         }
         else if (inputType == SensorInput.UP_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendUp(test_text.text, test_text.layout)
+
+            if (!practiceFlag)
+                current_exp_metrics.UP_ROT++
             return
         }
 
         if (inputType == SensorInput.CLOCK_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendToRightEdge(test_text.text, test_text.layout)
+
+            if (!practiceFlag)
+                current_exp_metrics.CLOCK_ROT++
             return
         }
 
         else if (inputType == SensorInput.COUNTERCLOCK_ROT)
         {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+
             extendToLeftEdge(test_text.text, test_text.layout)
+
+            if (!practiceFlag)
+                current_exp_metrics.COUNTERCLOCK_ROT++
             return
         }
 
@@ -568,8 +689,17 @@ class MainActivity : ComponentActivity() {
             if (!c_timer.checkTimer())
                 return
 
+            // Flip selection indices if needed
+            var sel_start = test_text.selectionStart
+            var sel_end = test_text.selectionEnd
+            if (test_text.selectionStart > test_text.selectionEnd)
+            {
+                sel_start = test_text.selectionEnd
+                sel_end = test_text.selectionStart
+            }
+
             // Set text to clipboard
-            val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
+            val selected_text: CharSequence = test_text.text.subSequence(sel_start, sel_end)
             setClipboardClip(selected_text)
 
             // Remove selection after copy
@@ -577,6 +707,8 @@ class MainActivity : ComponentActivity() {
 
             // Start timer
             c_timer.setTimer(2000, SensorInput.UP_MOVE)
+
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
 
             return
         }
@@ -614,14 +746,91 @@ class MainActivity : ComponentActivity() {
 
     private fun setClipboardClip(new_text: CharSequence)
     {
-        // Copy to clipboard and set as primary clip
-        val new_clip = ClipData.newPlainText("label", new_text)
-        clipManager.setPrimaryClip(new_clip)
+        try {
+            if (!practiceFlag)
+                current_exp_metrics.copyAttempts++
+            // Copy to clipboard and set as primary clip
+            val new_clip = ClipData.newPlainText("label", new_text)
+            clipManager.setPrimaryClip(new_clip)
 
-        // Message user
-        Toast.makeText(
-            this, R.string.copy_action_msg,
-            Toast.LENGTH_LONG
-        ).show()
+            // Compare copied text
+            if (!practiceFlag && experimentList[current_exp_id].tgtText == new_text.toString())
+                switchExperiment()
+
+            // Message user
+            Toast.makeText(
+                this, R.string.copy_action_msg,
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: StringIndexOutOfBoundsException) {
+            // handler
+            Toast.makeText(
+                this, R.string.copy_action_msg,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    // On copy action of correct text
+    private fun switchExperiment()
+    {
+        val externalStorageDir = getExternalFilesDir(Environment.getDataDirectory().absolutePath)?.absolutePath
+        current_exp_metrics.saveToJSON(this, "user"+ current_exp_metrics.userID + "_expid" + current_exp_metrics.expID, externalStorageDir)
+
+        // TODO: End experiment!
+        if (experimentList.size == 1)
+        {
+            Toast.makeText(
+                this, R.string.exp_end_temp,
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        // Update list
+        experimentList.removeAt(current_exp_id)
+
+        // Get next id
+        current_exp_id = (0..(experimentList.size - 1)).random()
+
+        setupExperiment(current_exp_id)
+    }
+
+    private fun setupExperiment(experiment_id: Int)
+    {
+        current_exp_metrics = ExperimentMetrics(userID, experimentList[current_exp_id].id, System.currentTimeMillis())
+
+        test_text.text = SpannableStringBuilder(experimentList[experiment_id].selectText)
+        val st = experimentList[experiment_id].selectText.indexOf(experimentList[experiment_id].tgtText)
+        val end = st + experimentList[experiment_id].tgtText.length
+        test_text.text.setSpan(ForegroundColorSpan(Color.MAGENTA), st, end, 0)
+
+        if(experimentList[experiment_id].expType == ExperimentType.GYROTEXT)
+            methodText.text = SpannableStringBuilder(resources.getString(R.string.tilt_method))
+        else
+            methodText.text = SpannableStringBuilder(resources.getString(R.string.default_method))
+    }
+
+    private fun startPractice()
+    {
+        // Assign ID
+        userID = idInput.text.toString().toInt()
+
+        // Update screen
+        test_text.visibility = View.VISIBLE
+        idBut.visibility = View.GONE
+        idInput.visibility = View.GONE
+        startPracticeBut.visibility = View.VISIBLE
+    }
+
+    private fun startExperiment()
+    {
+        // Update screen
+        startPracticeBut.visibility = View.GONE
+        methodText.visibility = View.VISIBLE
+
+        practiceFlag = false
+        current_exp_id = (0..(experimentList.size - 1)).random()
+        setupExperiment(current_exp_id)
     }
 }
