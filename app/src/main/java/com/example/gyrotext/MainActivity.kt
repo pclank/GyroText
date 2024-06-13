@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
+    private lateinit var updown_timer: CustomTimer
     private lateinit var clipManager: ClipboardManager
     private var resetFlag: Boolean = false
 
@@ -240,6 +241,8 @@ class MainActivity : ComponentActivity() {
 
         // Initialize timer
         c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
+        updown_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
+
 
         vibrator = getSystemService(Vibrator::class.java)
 
@@ -285,6 +288,17 @@ class MainActivity : ComponentActivity() {
                     // If acceleration input doesn't exist
                     else
                     {
+                        if (inputList[0] == SensorInput.UP_ROT || inputList[0] == SensorInput.DOWN_ROT){
+                            if (!updown_timer.checkTimer()){
+                                inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
+                                // Set handler
+                                inputHandler.postDelayed(this, handlerDelay)
+                                return
+                            }
+                            else{
+                                updown_timer.setTimer(1000, SensorInput.NONE)
+                            }
+                        }
                         updateSelection(inputList[0])
                         inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
                     }
