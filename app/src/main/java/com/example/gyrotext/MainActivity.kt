@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
     private var gyroscope: Gyroscope? = null
     private var accelerometer: Accelerometer? = null
     private lateinit var c_timer: CustomTimer
+    private lateinit var updown_timer: CustomTimer
     private lateinit var clipManager: ClipboardManager
     private var resetFlag: Boolean = false
 
@@ -95,9 +96,9 @@ class MainActivity : ComponentActivity() {
     lateinit var test_text: EditText
 
     // Threshold "macros" for Gyro
-    private val gxThres = 0.8f
-    private val gyThres = 0.8f
-    private val gzThres = 0.9f
+    private val gxThres = 6.0f
+    private val gyThres = 5.0f
+    private val gzThres = 5.0f
 
     // Threshold "macros" for Accel
 //    private val axThres = 1.5f
@@ -119,7 +120,7 @@ class MainActivity : ComponentActivity() {
 
     // Input handling
     private var inputHandler: Handler = Handler()
-    private val handlerDelay: Long = 5
+    private val handlerDelay: Long = 10
     @Volatile
     private var inputList: Array<SensorInput> = arrayOf(SensorInput.NONE, SensorInput.NONE)
 
@@ -240,6 +241,7 @@ class MainActivity : ComponentActivity() {
 
         // Initialize timer
         c_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
+        updown_timer = CustomTimer(System.currentTimeMillis(), 2000, false, null)
 
         vibrator = getSystemService(Vibrator::class.java)
 
@@ -285,6 +287,15 @@ class MainActivity : ComponentActivity() {
                     // If acceleration input doesn't exist
                     else
                     {
+                        if (inputList[0] == SensorInput.UP_ROT || inputList[0] == SensorInput.DOWN_ROT){
+                            if (!updown_timer.checkTimer()){
+                                inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
+                                return
+                            }
+                            else{
+                                updown_timer.setTimer(1000, SensorInput.NONE)
+                            }
+                        }
                         updateSelection(inputList[0])
                         inputList = arrayOf(SensorInput.NONE, SensorInput.NONE)
                     }
