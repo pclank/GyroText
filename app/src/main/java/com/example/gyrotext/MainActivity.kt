@@ -9,6 +9,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.text.InputType
 import android.text.Selection.extendDown
 import android.text.Selection.extendLeft
 import android.text.Selection.extendRight
@@ -138,6 +139,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main)
 
+//        Thread.setDefaultUncaughtExceptionHandler { paramThread, paramThrowable -> //Catch your exception
+//            // Without System.exit() this will not work.
+//            System.exit(2)
+//        }
+
         // Initialize all
         testMetricsBut = findViewById(R.id.test_but)
         copyBut = findViewById(R.id.copy_but)
@@ -193,8 +199,17 @@ class MainActivity : ComponentActivity() {
             saveMetrics(g_max_x, g_max_y, g_max_z, maxtx, maxty, maxtz, maxFwd, maxBwd)
         }
         copyBut.setOnClickListener {
+            // Flip selection indices if needed
+            var sel_start = test_text.selectionStart
+            var sel_end = test_text.selectionEnd
+            if (test_text.selectionStart > test_text.selectionEnd)
+            {
+                sel_start = test_text.selectionEnd
+                sel_end = test_text.selectionStart
+            }
+
             // Set text to clipboard
-            val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
+            val selected_text: CharSequence = test_text.text.subSequence(sel_start, sel_end)
             setClipboardClip(selected_text)
 
             // Remove selection after copy
@@ -566,6 +581,9 @@ class MainActivity : ComponentActivity() {
     {
         require(rightRep > 0 && leftRep > 0) { R.string.left_right_assertion_error }
 
+        if (inputType == SensorInput.NONE)
+            return
+
         // Gyro stuff
         if (inputType == SensorInput.RIGHT_ROT)
         {
@@ -671,8 +689,17 @@ class MainActivity : ComponentActivity() {
             if (!c_timer.checkTimer())
                 return
 
+            // Flip selection indices if needed
+            var sel_start = test_text.selectionStart
+            var sel_end = test_text.selectionEnd
+            if (test_text.selectionStart > test_text.selectionEnd)
+            {
+                sel_start = test_text.selectionEnd
+                sel_end = test_text.selectionStart
+            }
+
             // Set text to clipboard
-            val selected_text: CharSequence = test_text.text.subSequence(test_text.selectionStart, test_text.selectionEnd)
+            val selected_text: CharSequence = test_text.text.subSequence(sel_start, sel_end)
             setClipboardClip(selected_text)
 
             // Remove selection after copy
@@ -719,21 +746,29 @@ class MainActivity : ComponentActivity() {
 
     private fun setClipboardClip(new_text: CharSequence)
     {
-        if (!practiceFlag)
-            current_exp_metrics.copyAttempts++
-        // Copy to clipboard and set as primary clip
-        val new_clip = ClipData.newPlainText("label", new_text)
-        clipManager.setPrimaryClip(new_clip)
+        try {
+            if (!practiceFlag)
+                current_exp_metrics.copyAttempts++
+            // Copy to clipboard and set as primary clip
+            val new_clip = ClipData.newPlainText("label", new_text)
+            clipManager.setPrimaryClip(new_clip)
 
-        // Compare copied text
-        if (!practiceFlag && experimentList[current_exp_id].tgtText == new_text.toString())
-            switchExperiment()
+            // Compare copied text
+            if (!practiceFlag && experimentList[current_exp_id].tgtText == new_text.toString())
+                switchExperiment()
 
-        // Message user
-        Toast.makeText(
-            this, R.string.copy_action_msg,
-            Toast.LENGTH_LONG
-        ).show()
+            // Message user
+            Toast.makeText(
+                this, R.string.copy_action_msg,
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: StringIndexOutOfBoundsException) {
+            // handler
+            Toast.makeText(
+                this, R.string.copy_action_msg,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     // On copy action of correct text
