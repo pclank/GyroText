@@ -228,6 +228,7 @@ class MainActivity : ComponentActivity() {
         methodText.visibility = View.GONE
         test_text.visibility = View.GONE
         startPracticeBut.visibility = View.GONE
+        copyBut.visibility = View.GONE
 
         // Initialize and set up gyroscope
         gyroscope = Gyroscope(this)
@@ -806,9 +807,15 @@ class MainActivity : ComponentActivity() {
         test_text.text.setSpan(ForegroundColorSpan(Color.MAGENTA), st, end, 0)
 
         if(experimentList[experiment_id].expType == ExperimentType.GYROTEXT)
+        {
+            copyBut.visibility = View.GONE
             methodText.text = SpannableStringBuilder(resources.getString(R.string.tilt_method))
+        }
         else
+        {
+            copyBut.visibility = View.VISIBLE
             methodText.text = SpannableStringBuilder(resources.getString(R.string.default_method))
+        }
     }
 
     private fun startPractice()
@@ -821,6 +828,7 @@ class MainActivity : ComponentActivity() {
         idBut.visibility = View.GONE
         idInput.visibility = View.GONE
         startPracticeBut.visibility = View.VISIBLE
+        copyBut.visibility = View.VISIBLE
     }
 
     private fun startExperiment()
