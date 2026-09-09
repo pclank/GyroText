@@ -1,0 +1,1 @@
+Kotlin application for mobile phones, providing an alternate way of text highlighting and editing through tilt controls, utilizing the gyroscope of the device.
